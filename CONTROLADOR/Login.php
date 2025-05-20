@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         exit;
     } else {
-        echo "<script>alert('Correo o contraseña incorrectos'); window.location.href = '../SANSARA_DV/INDEX.php';</script>";
+        echo "<script>alert('Correo o contraseña incorrectos'); window.location.href = '../SANSARA_DV/index.php';</script>";
     }
 
     $stmt->close();
