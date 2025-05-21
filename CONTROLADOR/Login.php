@@ -1,13 +1,15 @@
 <?php
-require_once '../MODELO/Conexion.php';
+ob_start();
 session_start();
+
+require_once '../MODELO/Conexion.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $correo = $_POST['correo'] ?? '';
     $contrasena = $_POST['contrasena'] ?? '';
 
     try {
-        $conn = conectar();  // conecta con PDO a PostgreSQL
+        $conn = conectar();
 
         $sql = "SELECT * FROM usuarios WHERE correo = :correo LIMIT 1";
         $stmt = $conn->prepare($sql);
@@ -41,11 +43,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo "<script>alert('Correo o contraseña incorrectos'); window.location.href = '../SANSARA_DV/index.php';</script>";
         }
     } catch (PDOException $e) {
-        // Manejar error de conexión o consulta
         echo "Error en la base de datos: " . $e->getMessage();
     }
 } else {
     header("Location: ../SANSARA_DV/INDEX.php");
     exit;
 }
-?>
+
+ob_end_flush();
