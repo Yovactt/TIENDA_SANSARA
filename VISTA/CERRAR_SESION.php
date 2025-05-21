@@ -83,7 +83,7 @@
   <script>
     function logout() {
       // Aquí puedes limpiar sesión o redirigir
-      window.location.href = "../INDEX.php"; // Cambia esto si tu login está en otra URL
+      window.location.href = "../index.php"; // Cambia esto si tu login está en otra URL
     }
   </script>
 </body>
