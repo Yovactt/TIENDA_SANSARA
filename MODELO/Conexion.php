@@ -1,22 +1,20 @@
 <?php
 function conectar() {
-    $host = 'localhost:3305';           // Host del servidor MariaDB
-    $usuario = 'root';       // Usuario de la base de datos
-    $contrasena = 'Yovana21'; // Contraseña del usuario
-    $dbname = 'sansara';  // Nombre de la base de datos
+    $host = 'dpg-d0ml4quuk2gs73fof920-a.oregon-postgres.render.com'; // host completo de Render
+    $port = '5432';
+    $dbname = 'sansara';      // Tu nombre de base de datos en Render
+    $usuario = 'sansara_user';     // Tu usuario de PostgreSQL en Render
+    $contrasena = 'RcGlNtRexF21DPNsZpV5j6FLaikuSmBj'; // Tu contraseña
 
-    // Crear conexión
-    $conn = new mysqli($host, $usuario, $contrasena, $dbname);
-
-    // Verificar conexión
-    if ($conn->connect_error) {
-        die("Conexión fallida: " . $conn->connect_error);
+    try {
+        $conn = new PDO("pgsql:host=$host;port=$port;dbname=$dbname", $usuario, $contrasena, [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        ]);
+        return $conn;
+    } catch (PDOException $e) {
+        die("❌ Error de conexión: " . $e->getMessage());
     }
-
-    // Establecer conjunto de caracteres
-    $conn->set_charset("utf8");
-
-    return $conn;
 }
 ?>
 
