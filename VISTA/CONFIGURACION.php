@@ -229,7 +229,7 @@ button.save-btn:hover {
     <a href="MODIFICAR_USUARIOS.php"><i class="fas fa-users"></i><span>Modificar Usuarios</span></a>
     <a href="REGISTRAR_PRODUCTOS.php"><i class="fas fa-box-open"></i><span>Registrar Productos</span></a>
     <a href="REPORTESADM.html"><i class="fas fa-chart-line"></i><span>Reportes</span></a>
-    <a href="CONFIGURACION.php" class="active"><i class="fas fa-cog"></i><span>Configuración</span></a>
+    <a href="CONFIGURACION.php"><i class="fas fa-cog"></i><span>Configuración</span></a>
     <a href="CERRAR_SESION.php"><i class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span></a>
   </div>
 
