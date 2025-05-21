@@ -10,25 +10,313 @@ $rol = $_SESSION['rol'] ?? 'Administrador'; // 'Administrador' o 'Gerente'
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Registrar Productos</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    /* ... Todo tu CSS exactamente como lo compartiste ... */
+<style>
+  
+  /*Elimina márgenes/paddings por defecto.
+  Usa flexbox para disposición.
+  Fuente general: Arial*/
+  * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color:  #fff              ;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+   /*Es un menú lateral colapsado de 60px, que se expande con hover.
+    Fondo con degradado azul/negro.
+    Fijo al lado izquierdo */
+    .sidebar {
+      width: 60px;
+      background: linear-gradient(to right, #151718,  #03045E);
+      transition: width 0.3s ease;
+      overflow: hidden;
+      position: fixed;
+      height: 100%;
+      padding-top: 20px;
+    }
+
+    /*Cuando pasas el mouse por encima, el menú se expande animadamente.*/
+    .sidebar:hover {
+      width: 260px;
+    }
+
+   /* titulo y animacion
+    El título se oculta cuando el menú está colapsado.
+    Se aparece con opacidad cuando haces hover*/
+    .sidebar h2 {
+      color: #fff;
+      text-align: center;
+      margin-bottom: 30px;
+      /*animacion */
+      opacity: 0; 
+      transition: opacity 0.3s ease;
+    }
+
+    .sidebar:hover h2 {
+      opacity: 1;
+    }
+
+
+ /*Muestra los íconos con texto alineado
+ Tiene transición suave de color y fondo*/
+  .sidebar a {
+      display: flex;
+      align-items: center;
+      color: #fff;
+      padding: 12px 20px;
+      text-decoration: none;
+      transition: background 0.3s;
+    }
+
+    /* Base de los links para posicionar el indicador */
+    .sidebar a {
+    position: relative;
+    display: flex;
+    align-items: center;
+    color: #fff;
+    padding: 12px 20px;
+    text-decoration: none;
+    transition: background 0.3s ease, color 0.3s ease;
+    }
+
+  /* Aparece una barra dorada al lado izquierdo al pasar el mouse.
+    Se anima desde arriba hacia abajo (efecto "despliegue"). */
+    .sidebar a::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background: #F79824;
+    border-radius: 0 4px 4px 0;
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 0.3s ease;
+    }
+
+
+    /* Barra de seleccion */
+    .sidebar a:hover,
+    .sidebar a.active {
+    background: linear-gradient(90deg, rgba(253,202,64,0.2) 0%, #FDCA40  100%);
+    color: #151718;
+    }
+
+    /* Al activar hover/activo, desplegar la barra lateral */
+    .sidebar a:hover::before,
+    .sidebar a.active::before {
+    transform: scaleY(1);
+    }
+
+    /* Iconos: cambian de color al hover/activo */
+    .sidebar i {
+    min-width: 30px;
+    text-align: center;
+    font-size: 18px;
+    transition: color 0.3s ease;
+    }
+
+   /*color de los iconos al ser selccionado */
+    .sidebar a:hover i,
+    .sidebar a.active i {
+    color: #151718;
+    }
+
+
+ /*El texto del menú solo aparece al hacer hover (cuando se expande).*/
+    .sidebar span {
+      margin-left: 15px;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .sidebar:hover span {
+      opacity: 1;
+    }
+
+    /*Al hacer hover en el menú, el contenido se mueve suavemente hacia la derecha 
+    para dejar espacio al menú expandido.*/
+    .content {
+      margin-left: 80px;
+      padding: 60px;
+      transition: margin-left 0.3s ease;
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sidebar:hover ~ .content {
+      margin-left: 260px;
+    }
+
+    /*LETRAS*/
+    h2 {
+       margin-bottom: 20px; 
+       color:  #31393C  ;
+    }
+
+
+    .formulario, .tabla-container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px #808181;
+      margin-bottom: 30px;
+    }
+          
+    .formulario h3 { 
+      margin-bottom: 15px; 
+    }
+
+    .formulario .fila {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .formulario input,
+    .formulario select {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      min-width: 150px;
+      flex: 1;
+    }
+
+
+      /*Cuando se carga la página, el mensaje "BIENVENIDO GERENTE" aparece deslizándose 
+    hacia arriba y se desvanece desde 0% a 100% de opacidad*/
+    .welcome {
+      animation: fadeInSlide 1s ease forwards;
+      opacity: 0;
+    }
+
+    @keyframes fadeInSlide {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    
+
+    table {
+      width: 100%; /*ocupa todo el ancho del contenedor.*/
+      border-collapse: collapse; /* elimina espacios entre bordes.*/
+      background-color: #fff;
+      box-shadow: 0 0 5px #151718;/*  sombra suave alrededor de la tabla.*/
+    }
+
+   /*Celdas centradas, con borde y espaciado interno*/
+   th, td {
+      padding: 12px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+
+    /*Fondo con degradado azul oscuro a azul intenso.
+      Texto blanco.*/
+      th {
+        background: linear-gradient(to bottom, #31393C,#2176FF);
+        color: white;
+    }
+
+    tr:hover { 
+      background-color: #fff;
+    }
+
+    .sin-datos {
+      text-align: center;
+      color: #808181;
+      font-style: italic;
+    }
+
+
+    /*para que no se muestren las tablas */
+    .tabla-sucursal {
+      display: none;
+    }
+
+    /*se vean al selecionar */
+    .tabla-sucursal.visible {
+      display: block;
+    }
+
+
+    /*Botón con gradiente dorado/naranja, sombra y efecto hover animado.*/
+    .formulario button {
+        padding: 12px 24px;
+        background: linear-gradient(to right, #F79824, #FDCA40  );
+        color: #fff;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 4px 10px #151718 ;
+        transition: all 0.3s ease;
+     }
+
+    .formulario button:hover {
+        background: linear-gradient(to right, #FDCA40 , #F79824);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 14px #151718 ;
+    }
+
+  /* Fondo decorativo onda */
+  .wave {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      z-index: -1;
+    }
   </style>
 
   <script>
-    // Simulación para que puedas integrar con backend más tarde
     function filtrarSucursal() {
       const seleccion = document.getElementById("filtroSucursal").value;
       const contenedor = document.getElementById("contenedorTabla");
-      
-      // Simulación de resultados dinámicos (en desarrollo real deberías cargar por AJAX o PHP)
+
+      // Simulación de productos con etiqueta
       let tabla = `
         <table>
           <thead>
-            <tr><th>Modelo</th><th>Marca</th><th>Precio</th><th>Sucursal</th></tr>
+            <tr>
+              <th>Modelo</th>
+              <th>Marca</th>
+              <th>Precio</th>
+              <th>Etiqueta</th>
+              <th>Sucursal</th>
+            </tr>
           </thead>
           <tbody>
-            <tr><td>Modelo A</td><td>Marca X</td><td>$120</td><td>${seleccion}</td></tr>
-            <tr><td>Modelo B</td><td>Marca Y</td><td>$90</td><td>${seleccion}</td></tr>
+            <tr>
+              <td>Modelo A</td>
+              <td>Marca X</td>
+              <td>$120</td>
+              <td>NUEVO</td>
+              <td>${seleccion}</td>
+            </tr>
+            <tr>
+              <td>Modelo B</td>
+              <td>Marca Y</td>
+              <td>$90</td>
+              <td>LIQUIDACIÓN</td>
+              <td>${seleccion}</td>
+            </tr>
           </tbody>
         </table>
       `;
@@ -99,6 +387,11 @@ $rol = $_SESSION['rol'] ?? 'Administrador'; // 'Administrador' o 'Gerente'
           <input type="text" id="marca" name="marca" placeholder="Marca (opcional)">
           <label for="cantidad">Cantidad:</label>
           <input type="number" id="cantidad" name="cantidad" placeholder="Cantidad">
+        </div>
+
+        <div class="fila">
+          <label for="etiqueta">Etiqueta:</label>
+          <input type="text" id="etiqueta" name="etiqueta" placeholder="Ej. nuevo, rebaja, etc.">
         </div>
 
         <div class="fila">

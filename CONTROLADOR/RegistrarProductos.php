@@ -1,5 +1,5 @@
 <?php
-require_once '../modelo/conexion.php'; // Asegúrate que este archivo existe y conecta bien a PostgreSQL
+require_once '../MODELO/Conexion.php'; // Asegúrate que este archivo existe y conecta bien a PostgreSQL
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $categoria = $_POST['categoria'];
