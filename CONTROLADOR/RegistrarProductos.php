@@ -1,54 +1,29 @@
 <?php
-require_once '../MODELO/Conexion.php';
+require_once '../modelo/conexion.php'; // Asegúrate que este archivo existe y conecta bien a PostgreSQL
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $modelo = $_POST['modelo'] ?? '';
-    $categoria_id = $_POST['categoria'] ?? '';
-    $tipo = $_POST['tipo'] ?? '';
-    $color = $_POST['color'] ?? '';
-    $talla = $_POST['talla'] ?? '';
-    $stock = $_POST['stock'] ?? '';
-    $precio = $_POST['precio'] ?? '';
-    $sucursal_id = $_POST['sucursal'] ?? '';
+    $categoria = $_POST['categoria'];
+    $modelo = strtoupper(trim($_POST['modelo']));
+    $talla = strtoupper(trim($_POST['talla']));
+    $color = strtoupper(trim($_POST['color']));
+    $precio = $_POST['precio'];
+    $marca = strtoupper(trim($_POST['marca']));
+    $cantidad = $_POST['cantidad'];
+    $sucursal = $_POST['sucursal'];
+    $etiqueta = strtoupper(trim($_POST['etiqueta']));
 
-
-
-    $conn = conectar();
-
-    // Verifica si el producto ya existe (por modelo, talla y color)
-    $stmt = $conn->prepare("SELECT id FROM productos WHERE modelo = ? AND talla = ? AND color = ?");
-    $stmt->bind_param("sss", $modelo, $talla, $color);
-    $stmt->execute();
-    $stmt->bind_result($producto_id);
-    $stmt->fetch();
-    $stmt->close();
-
-    if (!$producto_id) {
-        // Insertar producto
-        $stmt = $conn->prepare("INSERT INTO productos (modelo, categoria_id, tipo, color, talla, precio) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("sisssd", $modelo, $categoria_id, $tipo, $color, $talla, $precio);
-        if ($stmt->execute()) {
-            $producto_id = $stmt->insert_id;
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Error al registrar el producto.']);
-            $stmt->close();
-            $conn->close();
-            exit;
+    // Verificar que no esté vacío algún campo obligatorio
+    if ($categoria && $modelo && $talla && $color && $precio && $cantidad && $sucursal && $etiqueta) {
+        try {
+            $consulta = $bd->prepare("INSERT INTO productos (categoria, modelo, talla, color, precio, marca, cantidad, sucursal, etiqueta)
+                                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $consulta->execute([$categoria, $modelo, $talla, $color, $precio, $marca, $cantidad, $sucursal, $etiqueta]);
+            header("Location: ../vista/REGISTRAR_PRODUCTOS.php?exito=1");
+        } catch (Exception $e) {
+            echo "Error al registrar: " . $e->getMessage();
         }
-        $stmt->close();
-    }
-
-    // Insertar en inventario
-    $stmt = $conn->prepare("INSERT INTO inventario (producto_id, sucursal_id, cantidad) VALUES (?, ?, ?)");
-    $stmt->bind_param("iii", $producto_id, $sucursal_id, $stock);
-    if ($stmt->execute()) {
-        echo json_encode(['success' => true, 'message' => 'Producto registrado correctamente.']);
     } else {
-        echo json_encode(['success' => false, 'message' => 'Error al registrar el inventario.']);
+        echo "Por favor, completa todos los campos obligatorios.";
     }
-
-    $stmt->close();
-    $conn->close();
-} else {
-    echo json_encode(['success' => false, 'message' => 'Método no permitido']);
 }
+?>
