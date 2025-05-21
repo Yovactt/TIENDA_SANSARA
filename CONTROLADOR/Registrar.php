@@ -11,27 +11,34 @@ $password = password_hash($_POST['contrasena'], PASSWORD_DEFAULT);
 $rol = "administrador";
 
 // Verificar si ya existe un administrador
-$sql_verificar = "SELECT * FROM usuarios WHERE rol = ?";
+$sql_verificar = "SELECT * FROM usuarios WHERE rol = :rol";
 $stmt = $conn->prepare($sql_verificar);
-$stmt->bind_param("s", $rol);
-$stmt->execute();
-$resultado = $stmt->get_result();
+$stmt->execute([':rol' => $rol]);
+$resultado = $stmt->fetchAll();
 
-if ($resultado->num_rows > 0) {
+if (count($resultado) > 0) {
     echo "<script>alert('Ya existe un administrador registrado.'); window.location.href='../INDEX.php';</script>";
 } else {
     $sql = "INSERT INTO usuarios (nombre, correo, telefono, direccion, contrasena, rol)
-            VALUES (?, ?, ?, ?, ?, ?)";
+            VALUES (:nombre, :correo, :telefono, :direccion, :contrasena, :rol)";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssssss", $nombre, $correo, $telefono, $direccion, $password, $rol);
 
-    if ($stmt->execute()) {
+    $params = [
+        ':nombre' => $nombre,
+        ':correo' => $correo,
+        ':telefono' => $telefono,
+        ':direccion' => $direccion,
+        ':contrasena' => $password,
+        ':rol' => $rol
+    ];
+
+    if ($stmt->execute($params)) {
         echo "<script>alert('Administrador registrado correctamente. Puedes iniciar sesión.'); window.location.href='../INDEX.php';</script>";
     } else {
-        echo "Error: " . $stmt->error;
+        $error = $stmt->errorInfo();
+        echo "Error: " . $error[2];
     }
 }
 
-$stmt->close();
-$conn->close();
+// No es necesario cerrar con PDO, se cierra solo al terminar el script
 ?>
