@@ -17,7 +17,7 @@ $stmt->execute([':rol' => $rol]);
 $resultado = $stmt->fetchAll();
 
 if (count($resultado) > 0) {
-    echo "<script>alert('Ya existe un administrador registrado.'); window.location.href='../INDEX.php';</script>";
+    echo "<script>alert('Ya existe un administrador registrado.'); window.location.href='../index.php';</script>";
 } else {
     $sql = "INSERT INTO usuarios (nombre, correo, telefono, direccion, contrasena, rol)
             VALUES (:nombre, :correo, :telefono, :direccion, :contrasena, :rol)";
@@ -33,7 +33,7 @@ if (count($resultado) > 0) {
     ];
 
     if ($stmt->execute($params)) {
-        echo "<script>alert('Administrador registrado correctamente. Puedes iniciar sesión.'); window.location.href='../INDEX.php';</script>";
+        echo "<script>alert('Administrador registrado correctamente. Puedes iniciar sesión.'); window.location.href='../index.php';</script>";
     } else {
         $error = $stmt->errorInfo();
         echo "Error: " . $error[2];
