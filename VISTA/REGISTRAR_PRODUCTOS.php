@@ -1,6 +1,28 @@
 <?php
 session_start();
 $rol = $_SESSION['rol'] ?? 'Administrador'; // 'Administrador' o 'Gerente'
+require_once '../MODELO/Conexion.php';
+
+$filtroSucursal = $_GET['filtroSucursal'] ?? 'todas';
+
+try {
+    $conn = conectar();
+
+    if ($filtroSucursal == 'todas') {
+        $stmt = $conn->prepare("SELECT p.*, c.nombre AS categoria_nombre FROM productos p LEFT JOIN categorias c ON p.categoria_id = c.id ORDER BY p.id DESC");
+        $stmt->execute();
+    } else {
+        $stmt = $conn->prepare("SELECT p.*, c.nombre AS categoria_nombre FROM productos p LEFT JOIN categorias c ON p.categoria_id = c.id WHERE p.sucursal = :sucursal ORDER BY p.id DESC");
+        $stmt->bindParam(':sucursal', $filtroSucursal);
+        $stmt->execute();
+    }
+
+    $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+} catch (PDOException $e) {
+    $productos = [];
+    // Opcional: manejar error de conexión o consulta
+}
 ?>
 
 <!DOCTYPE html>
@@ -11,10 +33,7 @@ $rol = $_SESSION['rol'] ?? 'Administrador'; // 'Administrador' o 'Gerente'
   <title>Registrar Productos</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-  
-  /*Elimina márgenes/paddings por defecto.
-  Usa flexbox para disposición.
-  Fuente general: Arial*/
+  /* (Aquí va todo tu CSS, igual que antes) */
   * {
       margin: 0;
       padding: 0;
@@ -23,15 +42,12 @@ $rol = $_SESSION['rol'] ?? 'Administrador'; // 'Administrador' o 'Gerente'
 
     body {
       font-family: Arial, sans-serif;
-      background-color:  #fff              ;
+      background-color:  #fff;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
     }
 
-   /*Es un menú lateral colapsado de 60px, que se expande con hover.
-    Fondo con degradado azul/negro.
-    Fijo al lado izquierdo */
     .sidebar {
       width: 60px;
       background: linear-gradient(to right, #151718,  #03045E);
@@ -42,19 +58,14 @@ $rol = $_SESSION['rol'] ?? 'Administrador'; // 'Administrador' o 'Gerente'
       padding-top: 20px;
     }
 
-    /*Cuando pasas el mouse por encima, el menú se expande animadamente.*/
     .sidebar:hover {
       width: 260px;
     }
 
-   /* titulo y animacion
-    El título se oculta cuando el menú está colapsado.
-    Se aparece con opacidad cuando haces hover*/
     .sidebar h2 {
       color: #fff;
       text-align: center;
       margin-bottom: 30px;
-      /*animacion */
       opacity: 0; 
       transition: opacity 0.3s ease;
     }
@@ -63,75 +74,53 @@ $rol = $_SESSION['rol'] ?? 'Administrador'; // 'Administrador' o 'Gerente'
       opacity: 1;
     }
 
-
- /*Muestra los íconos con texto alineado
- Tiene transición suave de color y fondo*/
-  .sidebar a {
+    .sidebar a {
+      position: relative;
       display: flex;
       align-items: center;
       color: #fff;
       padding: 12px 20px;
       text-decoration: none;
-      transition: background 0.3s;
+      transition: background 0.3s ease, color 0.3s ease;
     }
 
-    /* Base de los links para posicionar el indicador */
-    .sidebar a {
-    position: relative;
-    display: flex;
-    align-items: center;
-    color: #fff;
-    padding: 12px 20px;
-    text-decoration: none;
-    transition: background 0.3s ease, color 0.3s ease;
-    }
-
-  /* Aparece una barra dorada al lado izquierdo al pasar el mouse.
-    Se anima desde arriba hacia abajo (efecto "despliegue"). */
     .sidebar a::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: 4px;
-    background: #F79824;
-    border-radius: 0 4px 4px 0;
-    transform: scaleY(0);
-    transform-origin: top;
-    transition: transform 0.3s ease;
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 4px;
+      background: #F79824;
+      border-radius: 0 4px 4px 0;
+      transform: scaleY(0);
+      transform-origin: top;
+      transition: transform 0.3s ease;
     }
 
-
-    /* Barra de seleccion */
     .sidebar a:hover,
     .sidebar a.active {
-    background: linear-gradient(90deg, rgba(253,202,64,0.2) 0%, #FDCA40  100%);
-    color: #151718;
+      background: linear-gradient(90deg, rgba(253,202,64,0.2) 0%, #FDCA40  100%);
+      color: #151718;
     }
 
-    /* Al activar hover/activo, desplegar la barra lateral */
     .sidebar a:hover::before,
     .sidebar a.active::before {
-    transform: scaleY(1);
+      transform: scaleY(1);
     }
 
-    /* Iconos: cambian de color al hover/activo */
     .sidebar i {
-    min-width: 30px;
-    text-align: center;
-    font-size: 18px;
-    transition: color 0.3s ease;
+      min-width: 30px;
+      text-align: center;
+      font-size: 18px;
+      transition: color 0.3s ease;
     }
 
-   /*color de los iconos al ser selccionado */
     .sidebar a:hover i,
     .sidebar a.active i {
-    color: #151718;
+      color: #151718;
     }
 
-
- /*El texto del menú solo aparece al hacer hover (cuando se expande).*/
     .sidebar span {
       margin-left: 15px;
       white-space: nowrap;
@@ -143,8 +132,6 @@ $rol = $_SESSION['rol'] ?? 'Administrador'; // 'Administrador' o 'Gerente'
       opacity: 1;
     }
 
-    /*Al hacer hover en el menú, el contenido se mueve suavemente hacia la derecha 
-    para dejar espacio al menú expandido.*/
     .content {
       margin-left: 80px;
       padding: 60px;
@@ -158,12 +145,10 @@ $rol = $_SESSION['rol'] ?? 'Administrador'; // 'Administrador' o 'Gerente'
       margin-left: 260px;
     }
 
-    /*LETRAS*/
     h2 {
        margin-bottom: 20px; 
        color:  #31393C  ;
     }
-
 
     .formulario, .tabla-container {
       background: #fff;
@@ -172,7 +157,7 @@ $rol = $_SESSION['rol'] ?? 'Administrador'; // 'Administrador' o 'Gerente'
       box-shadow: 0 2px 6px #808181;
       margin-bottom: 30px;
     }
-          
+
     .formulario h3 { 
       margin-bottom: 15px; 
     }
@@ -183,6 +168,7 @@ $rol = $_SESSION['rol'] ?? 'Administrador'; // 'Administrador' o 'Gerente'
       gap: 10px;
       margin-bottom: 10px;
     }
+
     .formulario input,
     .formulario select {
       padding: 10px;
@@ -192,9 +178,6 @@ $rol = $_SESSION['rol'] ?? 'Administrador'; // 'Administrador' o 'Gerente'
       flex: 1;
     }
 
-
-      /*Cuando se carga la página, el mensaje "BIENVENIDO GERENTE" aparece deslizándose 
-    hacia arriba y se desvanece desde 0% a 100% de opacidad*/
     .welcome {
       animation: fadeInSlide 1s ease forwards;
       opacity: 0;
@@ -211,27 +194,22 @@ $rol = $_SESSION['rol'] ?? 'Administrador'; // 'Administrador' o 'Gerente'
       }
     }
 
-    
-
     table {
-      width: 100%; /*ocupa todo el ancho del contenedor.*/
-      border-collapse: collapse; /* elimina espacios entre bordes.*/
+      width: 100%;
+      border-collapse: collapse;
       background-color: #fff;
-      box-shadow: 0 0 5px #151718;/*  sombra suave alrededor de la tabla.*/
+      box-shadow: 0 0 5px #151718;
     }
 
-   /*Celdas centradas, con borde y espaciado interno*/
-   th, td {
+    th, td {
       padding: 12px;
       text-align: center;
       border: 1px solid #ddd;
     }
 
-    /*Fondo con degradado azul oscuro a azul intenso.
-      Texto blanco.*/
-      th {
-        background: linear-gradient(to bottom, #31393C,#2176FF);
-        color: white;
+    th {
+      background: linear-gradient(to bottom, #31393C,#2176FF);
+      color: white;
     }
 
     tr:hover { 
@@ -244,99 +222,33 @@ $rol = $_SESSION['rol'] ?? 'Administrador'; // 'Administrador' o 'Gerente'
       font-style: italic;
     }
 
-
-    /*para que no se muestren las tablas */
-    .tabla-sucursal {
-      display: none;
-    }
-
-    /*se vean al selecionar */
-    .tabla-sucursal.visible {
-      display: block;
-    }
-
-
-    /*Botón con gradiente dorado/naranja, sombra y efecto hover animado.*/
     .formulario button {
-        padding: 12px 24px;
-        background: linear-gradient(to right, #F79824, #FDCA40  );
-        color: #fff;
-        font-weight: bold;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        box-shadow: 0 4px 10px #151718 ;
-        transition: all 0.3s ease;
-     }
+      padding: 12px 24px;
+      background: linear-gradient(to right, #F79824, #FDCA40  );
+      color: #fff;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px #151718 ;
+      transition: all 0.3s ease;
+    }
 
     .formulario button:hover {
-        background: linear-gradient(to right, #FDCA40 , #F79824);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 14px #151718 ;
+      background: linear-gradient(to right, #FDCA40 , #F79824);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px #151718 ;
     }
-
-  /* Fondo decorativo onda */
-  .wave {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      z-index: -1;
-    }
-  </style>
-
-  <script>
-    function filtrarSucursal() {
-      const seleccion = document.getElementById("filtroSucursal").value;
-      const contenedor = document.getElementById("contenedorTabla");
-
-      // Simulación de productos con etiqueta
-      let tabla = `
-        <table>
-          <thead>
-            <tr>
-              <th>Modelo</th>
-              <th>Marca</th>
-              <th>Precio</th>
-              <th>Etiqueta</th>
-              <th>Sucursal</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Modelo A</td>
-              <td>Marca X</td>
-              <td>$120</td>
-              <td>NUEVO</td>
-              <td>${seleccion}</td>
-            </tr>
-            <tr>
-              <td>Modelo B</td>
-              <td>Marca Y</td>
-              <td>$90</td>
-              <td>LIQUIDACIÓN</td>
-              <td>${seleccion}</td>
-            </tr>
-          </tbody>
-        </table>
-      `;
-
-      if (seleccion === "todas") {
-        tabla = `<p class="sin-datos">Mostrando productos de todas las sucursales (simulado)</p>` + tabla;
-      }
-
-      contenedor.innerHTML = tabla;
-    }
-  </script>
+</style>
 </head>
 <body>
   <div class="sidebar">
-    <?php if ($rol === 'administrador'): ?>
+    <?php if (strtolower($rol) === 'administrador'): ?>
       <h2>ADMINISTRADOR</h2>
       <a href="REGISTRO_DE_USUARIOS.php"><i class="fas fa-user-shield"></i><span>Registrar Usuarios</span></a>
       <a href="MODIFICAR_USUARIOS.php"><i class="fas fa-users"></i><span>Modificar Usuarios</span></a>
       <a href="REGISTRAR_PRODUCTOS.php"><i class="fas fa-box-open"></i><span>Registrar Productos</span></a>
-      <a href="REPORTESADM.html"><i class="fas fa-chart-line"></i><span>Reportes</span></a>
+      <a href="REPORTES_ADMIN.php"><i class="fas fa-chart-line"></i><span>Reportes</span></a>
       <a href="CONFIGURACION.php"><i class="fas fa-cog"></i><span>Configuración</span></a>
       <a href="CERRAR_SESION.php"><i class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span></a>
     <?php else: ?>
@@ -351,7 +263,7 @@ $rol = $_SESSION['rol'] ?? 'Administrador'; // 'Administrador' o 'Gerente'
 
   <div class="content">
     <div class="welcome">
-      <h2>Bienvenido <?php echo $rol; ?></h2>
+     <h2><i class="fas fa-box-open"></i>  REGISTRAR PRODUCTOS</h2>
     </div>
 
     <!-- Formulario de Registro de Producto -->
@@ -359,44 +271,47 @@ $rol = $_SESSION['rol'] ?? 'Administrador'; // 'Administrador' o 'Gerente'
       <h3>Formulario de Registro de Producto</h3>
       <form action="../CONTROLADOR/RegistrarProductos.php" method="POST">
         <div class="fila">
-          <label for="categoria">Categoría:</label>
-          <select id="categoria" name="categoria">
+          <label for="categoria_id">Categoría:</label>
+          <select id="categoria_id" name="categoria_id">
             <option value="">Seleccionar</option>
-            <option value="ropa">Ropa</option>
-            <option value="chanclas">Chanclas</option>
-            <option value="chacharas">Chacharas</option>
+            <option value="1">Ropa de Dama</option>
+            <option value="2">Ropa de Caballero</option>
+            <option value="3">Ropa de Niño</option>
+            <option value="4">Ropa de Niña</option>
+            <option value="5">Sandalias</option>
+            <option value="6">Chacharas</option>
           </select>
         </div>
 
         <div class="fila">
           <label for="modelo">Modelo:</label>
-          <input type="text" id="modelo" name="modelo" placeholder="Modelo del producto">
+          <input type="text" id="modelo" name="modelo" placeholder="Modelo del producto" required>
           <label for="talla">Talla:</label>
-          <input type="text" id="talla" name="talla" placeholder="Talla">
+          <input type="text" id="talla" name="talla" placeholder="Talla" required>
         </div>
 
         <div class="fila">
           <label for="color">Color:</label>
-          <input type="text" id="color" name="color" placeholder="Color">
+          <input type="text" id="color" name="color" placeholder="Color" required>
           <label for="precio">Precio:</label>
-          <input type="number" id="precio" name="precio" placeholder="Precio">
+          <input type="number" id="precio" name="precio" placeholder="Precio" required step="0.01" min="0">
         </div>
 
         <div class="fila">
           <label for="marca">Marca:</label>
           <input type="text" id="marca" name="marca" placeholder="Marca (opcional)">
           <label for="cantidad">Cantidad:</label>
-          <input type="number" id="cantidad" name="cantidad" placeholder="Cantidad">
+          <input type="number" id="cantidad" name="cantidad" placeholder="Cantidad" required min="0">
         </div>
 
         <div class="fila">
           <label for="etiqueta">Etiqueta:</label>
-          <input type="text" id="etiqueta" name="etiqueta" placeholder="Ej. nuevo, rebaja, etc.">
+          <input type="text" id="etiqueta" name="etiqueta" >
         </div>
 
         <div class="fila">
           <label for="sucursal">Sucursal:</label>
-          <select id="sucursal" name="sucursal">
+          <select id="sucursal" name="sucursal" required>
             <option value="Sucursal1">Sucursal 1</option>
             <option value="Sucursal2">Sucursal 2</option>
             <option value="Sucursal3">Sucursal 3</option>
@@ -413,21 +328,56 @@ $rol = $_SESSION['rol'] ?? 'Administrador'; // 'Administrador' o 'Gerente'
     <!-- Filtro de Productos por Sucursal -->
     <div class="formulario">
       <h3>Ver Productos por Sucursal</h3>
-      <div class="fila">
-        <label for="filtroSucursal">Sucursal:</label>
-        <select id="filtroSucursal" onchange="filtrarSucursal()">
-          <option value="todas">Todas</option>
-          <option value="Sucursal1">Sucursal 1</option>
-          <option value="Sucursal2">Sucursal 2</option>
-          <option value="Sucursal3">Sucursal 3</option>
-          <option value="Sucursal4">Sucursal 4</option>
-        </select>
-      </div>
+      <form method="GET" action="REGISTRAR_PRODUCTOS.php">
+        <div class="fila">
+          <label for="filtroSucursal">Sucursal:</label>
+          <select id="filtroSucursal" name="filtroSucursal" onchange="this.form.submit()">
+            <option value="todas" <?php if(($filtroSucursal ?? '') == 'todas') echo 'selected'; ?>>Todas</option>
+            <option value="Sucursal1" <?php if(($filtroSucursal ?? '') == 'Sucursal1') echo 'selected'; ?>>Sucursal 1</option>
+            <option value="Sucursal2" <?php if(($filtroSucursal ?? '') == 'Sucursal2') echo 'selected'; ?>>Sucursal 2</option>
+            <option value="Sucursal3" <?php if(($filtroSucursal ?? '') == 'Sucursal3') echo 'selected'; ?>>Sucursal 3</option>
+            <option value="Sucursal4" <?php if(($filtroSucursal ?? '') == 'Sucursal4') echo 'selected'; ?>>Sucursal 4</option>
+          </select>
+        </div>
+      </form>
     </div>
 
-    <!-- Contenedor dinámico para la tabla -->
+    <!-- Contenedor dinámico para la tabla de productos filtrados -->
     <div class="tabla-container" id="contenedorTabla">
-      <!-- Aquí se mostrará la tabla con los productos filtrados -->
+      <?php if (empty($productos)): ?>
+        <p class="sin-datos">No hay productos registrados para esta sucursal.</p>
+      <?php else: ?>
+        <table>
+          <thead>
+            <tr>
+              <th>Modelo</th>
+              <th>Categoría</th>
+              <th>Talla</th>
+              <th>Color</th>
+              <th>Precio</th>
+              <th>Marca</th>
+              <th>Cantidad</th>
+              <th>Etiqueta</th>
+              <th>Sucursal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php foreach ($productos as $producto): ?>
+              <tr>
+                <td><?php echo htmlspecialchars($producto['modelo']); ?></td>
+                <td><?php echo htmlspecialchars($producto['categoria_nombre'] ?? ''); ?></td>
+                <td><?php echo htmlspecialchars($producto['talla']); ?></td>
+                <td><?php echo htmlspecialchars($producto['color']); ?></td>
+                <td><?php echo number_format($producto['precio'], 2); ?></td>
+                <td><?php echo htmlspecialchars($producto['marca']); ?></td>
+                <td><?php echo (int)$producto['cantidad']; ?></td>
+                <td><?php echo htmlspecialchars($producto['etiqueta']); ?></td>
+                <td><?php echo htmlspecialchars($producto['sucursal']); ?></td>
+              </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      <?php endif; ?>
     </div>
   </div>
 </body>

@@ -204,7 +204,7 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'gerente') {
     <a href="CONTROLINVENTARIOGEREN.html"><i class="fas fa-boxes-stacked"></i><span>Control de Inventario</span></a>
     <a href="REGISTRAR_PRODUCTOS.php"><i class="fas fa-box-open"></i><span>Registrar Productos</span></a> 
     <a href="REPORTESGERENTE.html"><i class="fas fa-chart-bar"></i><span>Reportes</span></a>
-    <a href="CERRARSESION.html"><i class="	fas fa-right-from-bracket"></i><span>Cerrar Sesión</span></a>
+    <a href="CERRAR_SESION.php"><i class="	fas fa-right-from-bracket"></i><span>Cerrar Sesión</span></a>
   </div>
 
   <div class="content">
