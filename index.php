@@ -1,332 +1,498 @@
+<?php
+if (isset($_GET['updated']) && $_GET['updated'] == 1) {
+    echo "<p style='color:green;'>Tu perfil y contraseña se actualizaron correctamente. Por favor, inicia sesión con tu nueva contraseña.</p>";
+}
+include_once 'MODELO/Conexion.php';
+$conn = conectar();
+
+$stmt = $conn->prepare("SELECT COUNT(*) as total FROM usuarios WHERE rol = 'administrador'");
+$stmt->execute();
+$resultado = $stmt->fetch();
+$hayAdmin = $resultado['total'] > 0;
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sansara - Ingreso y Registro</title>
-  <link href="https://fonts.googleapis.com/css2?family=Telma&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+  <title>SANSARA - Login & Registro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    /* ESTILOS CSS */
     * {
+      margin: 0;
+      padding: 0;
       box-sizing: border-box;
     }
 
     body {
-      font-family: 'Open Sans', sans-serif;
-      background: linear-gradient(to right, #151718, #03045E);
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #03045E, #151718);
       height: 100vh;
-      margin: 0;
-    }
-
-    .container {
-      position: relative;
-      width: 850px;
-      height: 550px;
-      background-color: #fff;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 0 30px #151718;
-    }
-
-    .form-container {
-      position: absolute;
-      top: 0;
-      height: 100%;
-      width: 50%;
-      transition: 0.6s ease-in-out;
       display: flex;
-      justify-content: center;
       align-items: center;
-      flex-direction: column;
-      padding: 0 30px;
-      background-color: #fff;
-      z-index: 1;
-    }
-
-    .register-form {
-      right: 0;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .login-form {
-      right: 0;
-    }
-
-    .container.active .login-form {
-      transform: translateX(-100%);
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .container.active .register-form {
-      transform: translateX(-100%);
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .toggle-panel {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 50%;
-      height: 100%;
-      background: linear-gradient(to right, #2176FF , #00B4D8 , #90EDEF);
-      color:  #fff;
-      display: flex;
-      flex-direction: column;
       justify-content: center;
-      align-items: center;
-      border-radius: 0 150px 150px 0;
-      z-index: 2;
-      transition: 0.6s ease-in-out;
+      color: #fff;
+    }
+
+    .glass-card {
+      backdrop-filter: blur(15px);
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 50px 40px;
+      width: 95%;
+      max-width: 500px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+      animation: fadeIn 1s ease;
+    }
+
+    h1 {
       text-align: center;
-      padding: 0 20px;
-    }
-
-    .container.active .toggle-panel {
-      transform: translateX(100%);
-      border-radius: 150px 0 0 150px;
-    }
-
-    h2 {
-      margin-bottom: 10px;
-      font-family: 'Telma', cursive;
-    }
-
-    p {
-      font-size: 14px;
-      margin-bottom: 15px;
+      margin-bottom: 24px;
+      font-size: 26px;
+      color: #F79824;
     }
 
     input {
-      margin: 8px 0;
-      padding: 12px;
       width: 100%;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+      padding: 12px 14px;
+      margin-bottom: 15px;
+      border: none;
+      border-radius: 10px;
+      background-color: rgba(255, 255, 255, 0.2);
+      color: white;
+      font-size: 14px;
     }
 
-    .form-container small {
-      font-size: 12px;
-      color: #555;
+    input::placeholder {
+      color: #ccc;
+    }
+
+    input:focus {
+      outline: 2px solid #FDCA40;
+      background-color: rgba(255, 255, 255, 0.3);
     }
 
     button {
-        padding: 12px 24px;
-        background: linear-gradient(to right, #F79824, #FDCA40);
-        color: #fff;
-        font-weight: bold;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        box-shadow: 0 4px 10px #151718;
-        transition: all 0.3s ease;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(to right, #F79824, #FDCA40);
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 10px;
+      transition: all 0.3s ease;
     }
 
     button:hover {
-      background: linear-gradient(to right, #FDCA40 , #F79824);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 14px #151718;
+      transform: scale(1.02);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.2);
     }
 
-    .checkbox-group {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    a {
+      display: block;
+      text-align: center;
       margin-top: 10px;
       font-size: 13px;
-    }
-
-    .form-container a {
-      font-size: 13px;
-      color: #007bff;
+      color: #90EDEF;
       text-decoration: none;
-      margin-top: 10px;
     }
 
-    .form-container a:hover {
+    a:hover {
       text-decoration: underline;
     }
 
-    #mensajeCorreo {
-      text-align: left;
-      width: 100%;
-      color: red;
+    #mensajeCorreo, #mensajeTelefono {
+      font-size: 12px;
+      color: #ff6b6b;
+      margin-top: -10px;
+      margin-bottom: 10px;
     }
 
-    .telefono-wrapper {
-      width: 100%;
-      text-align: left;
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    #mensajeTelefono {
-      color: red;
-      font-size: 0.9em;
-      margin-top: 5px;
-      display: block;
-      text-align: left;
-    }
-
-    /* MODAL CSS */
-    .modal {
+    .oculto {
       display: none;
-      position: fixed;
-      z-index: 99;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-      background-color: rgba(0,0,0,0.7);
     }
 
-    .modal-content {
-      background-color: #fefefe;
-      margin: 10% auto;
-      padding: 20px;
-      border: 1px solid #888;
-      width: 300px;
-      border-radius: 8px;
-      text-align: center;
-    }
+    /* Modal de fondo */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
 
-    .close {
-      color: #aaa;
-      float: right;
-      font-size: 24px;
-      font-weight: bold;
-      cursor: pointer;
-    }
+/* Tarjeta con estilo de cristal */
+.glass-card {
+  max-width: 400px;
+  background: rgba(15, 34, 204, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 30px 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  position: relative;
+  color: #fff;
+}
 
-    .close:hover {
-      color: #000;
-    }
-  </style>
+/* Botón cerrar (X) */
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 18px;
+  cursor: pointer;
+  color: #fff;
+}
+
+/* Botón aceptar */
+.modal-button {
+  display: block;
+  margin: 20px auto 0;
+  padding: 8px 20px;
+  background: linear-gradient(to right, #F79824, #FDCA40);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.modal-button:hover {
+  background-color: #e0b134;
+}
+
+/* estilos.css */
+.mensaje-error {
+  font-size: 12px;
+  color: #ff6b6b;
+  margin-top: -10px;
+  margin-bottom: 10px;
+}
+
+.mensaje-exito {
+  font-size: 12px;
+  color:rgba(52, 66, 60, 0.95);
+  margin-top: -10px;
+  margin-bottom: 10px;
+}
+
+  /*reposive*/
+  /* Celulares (pantallas pequeñas hasta 600px) */
+@media (max-width: 600px) {
+  body {
+    flex-direction: column;
+    height: auto;
+    overflow: auto;
+  }
+
+  .sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 10px 0;
+  }
+
+  .sidebar:hover {
+    width: 100%;
+  }
+
+  .sidebar h2 {
+    display: none;
+  }
+
+  .sidebar a {
+    justify-content: center;
+    flex-direction: column;
+    padding: 10px;
+  }
+
+  .sidebar i {
+    font-size: 18px;
+  }
+
+  .sidebar span {
+    opacity: 1 !important;
+    font-size: 12px;
+    margin-left: 0;
+    margin-top: 5px;
+  }
+
+  .content {
+    margin-left: 0;
+    padding: 20px;
+  }
+
+  .form-container {
+    margin: 0 auto;
+    width: 90%;
+    padding: 15px;
+  }
+
+  h2 {
+    font-size: 18px;
+    text-align: center;
+  }
+
+  .button {
+    width: 100%;
+    font-size: 14px;
+  }
+
+  .wave {
+    display: none;
+  }
+}
+
+/* Tablets (600px - 1024px) */
+@media (min-width: 601px) and (max-width: 1024px) {
+  .sidebar {
+    width: 80px;
+  }
+
+  .sidebar:hover {
+    width: 200px;
+  }
+
+  .content {
+    margin-left: 80px;
+    padding: 40px;
+  }
+
+  .sidebar:hover ~ .content {
+    margin-left: 200px;
+  }
+
+  .form-container {
+    width: 80%;
+    margin: 0 auto;
+  }
+}
+
+</style>
 </head>
 <body>
-  <script>
-    //VALIDACIONES
-    function validarNombre(input) {
-      const valor = input.value;
-      const soloLetras = /^[A-ZÁÉÍÓÚÑ\s]*$/;
-      input.value = valor.toUpperCase();
-      const mensaje = document.getElementById('errorNombre');
-      mensaje.textContent = !soloLetras.test(input.value) ? 'Nombre incorrecto' : '';
-    }
 
-    function validarCorreo(input) {
-      const mensaje = document.getElementById("mensajeCorreo");
-      const regexCorreo = /^[^\s@]+@(gmail\.com|hotmail\.com|icloud\.com)$/;
-      if (input.value.trim() === "") {
-        mensaje.textContent = "";
-        return;
-      }
-      mensaje.textContent = !regexCorreo.test(input.value) ? "Correo inválido" : "";
-    }
-
-    function formatearTelefono(input) {
-      let mensaje = document.getElementById("mensajeTelefono");
-      let valor = input.value.replace(/\D/g, '');
-      if (valor.length > 10) valor = valor.slice(0, 10);
-      let formateado = '';
-      if (valor.length > 0) formateado += valor.substring(0, 3);
-      if (valor.length > 3) formateado += ' ' + valor.substring(3, 6);
-      if (valor.length > 6) formateado += ' ' + valor.substring(6, 10);
-      input.value = formateado;
-      mensaje.style.display = (valor.length < 10 && valor.length > 0) ? "block" : "none";
-      mensaje.textContent = valor.length < 10 ? "Teléfono incorrecto" : "";
-    }
-
-    function formatearDireccion(input) {
-      input.value = input.value.toUpperCase();
-    }
-
-    // MODAL SCRIPT
-    function abrirModal() {
-      document.getElementById('modalRecuperar').style.display = 'block';
-    }
-
-    function cerrarModal() {
-      document.getElementById('modalRecuperar').style.display = 'none';
-    }
-
-    window.onclick = function(event) {
-      const modal = document.getElementById('modalRecuperar');
-      if (event.target == modal) {
-        modal.style.display = "none";
-      }
-    }
-  </script>
-
-  <div class="container" id="container">
-    <!-- Formulario de Inicio de Sesión -->
-    <form class="form-container login-form" action="CONTROLADOR/Login.php" method="POST">
-      <h2>BIENVENIDO DE NUEVO</h2>
-      <p>INICIA SESIÓN</p>
-      <input type="email" name="correo" placeholder="Correo" required />
-      <input type="password" name="contrasena" placeholder="Contraseña" required />
-
-      <a href="#" onclick="abrirModal()">¿Olvidaste tu contraseña?</a>
-      <button type="submit">Ingresar</button>
-    </form>
-
-    <!-- Formulario de Registro -->
-    <form class="form-container register-form" action="CONTROLADOR/Registrar.php" method="POST">
-      <h2>Crea tu cuenta</h2>
-      <p>Únete a la experiencia Sansara</p>
-      <input type="text" name="nombre" placeholder="Nombre completo" required oninput="validarNombre(this)" />
-      <span id="errorNombre" style="color: red; font-size: 0.8em;"></span>
-
-      <input type="email" id="correo" name="correo" placeholder="Correo" required oninput="validarCorreo(this)" />
-      <span id="mensajeCorreo" style="font-size: 0.9em; display: block; margin-top: 5px;"></span>
-
-      <div class="telefono-wrapper">
-        <input type="text" id="telefono" name="telefono" placeholder="Teléfono" maxlength="14" oninput="formatearTelefono(this)" />
-        <span id="mensajeTelefono" style="display: none;">Teléfono incorrecto</span>
-      </div>
-
-      <input type="text" id="direccion" name="direccion" placeholder="Dirección" oninput="formatearDireccion(this)" />
-      <span id="mensajeDireccion" style="font-size: 0.9em; display: block; margin-top: 5px;"></span>
-
-      <input type="password" name="contrasena" placeholder="Contraseña" required />
-      <input type="password" name="confirmar" placeholder="Confirmar contraseña" required />
-      <input type="hidden" name="rol" value="administrador">
-      <button type="submit">Registrarse</button>
-    </form>
-
-    <!-- Panel deslizante -->
-    <div class="toggle-panel" id="togglePanel">
-      <h2 id="toggleTitle">¡TIENDA SANSARA!</h2>
-      <p id="toggleText">Descubre un nuevo mundo de moda y arte</p>
-      <button id="toggleBtn">Registrarse</button>
+<div class="glass-card">
+  <?php if (!$hayAdmin): ?>
+    <div id="pantallaInicial">
+      <h1>Bienvenido a SANSARA</h1>
+      <p style="text-align:center; margin-bottom: 20px;">Presiona el botón para registrar al primer administrador.</p>
+      <button onclick="mostrarFormulario()">Registrar Administrador</button>
     </div>
-  </div>
 
-  <!-- MODAL DE RECUPERACIÓN -->
-  <div id="modalRecuperar" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="cerrarModal()">&times;</span>
-      <h3>Recuperar contraseña</h3>
-      <form action="CONTROLADOR/recuperar.php" method="POST">
-        <input type="email" name="correo" placeholder="Ingresa tu correo" required />
-        <button type="submit">Enviar enlace</button>
+    <div id="formularioRegistro" class="oculto">
+      <h1>Registrar Administrador</h1>
+      <form action="CONTROLADOR/Registrar.php" method="POST" >
+        <input type="text" name="nombre" placeholder="Nombre" required oninput="validarNombre(this)">
+        <input type="email" name="correo" placeholder="Correo" required oninput="validarCorreo(this)">
+        <div id="mensajeCorreo"></div>
+        <input type="text" name="telefono" placeholder="Teléfono" required oninput="formatearTelefono(this)">
+        <div id="mensajeTelefono"></div>
+        <input type="text" name="direccion" placeholder="Dirección" required oninput="formatearDireccion(this)">
+        <input type="password" name="contrasena" placeholder="Contraseña" required  link rel="stylesheet" href="estilos.css">
+        <input type="password" name="confirmar_contrasena" placeholder="Confirmar Contraseña" required  link rel="stylesheet" href="estilos.css">
+        <input type="hidden" name="rol" value="administrador">
+        <button type="submit">Registrarse</button>
       </form>
     </div>
+
+  <?php else: ?>
+    <h1>Iniciar Sesión</h1>
+    <form action="CONTROLADOR/Login.php" method="POST">
+      <input type="email" name="correo" placeholder="Correo" required>
+      <input type="password" name="contrasena" placeholder="Contraseña" required>
+      <a href="#" onclick="abrirModal()">¿Olvidaste tu contraseña?</a>
+      <button type="submit">Entrar</button>
+    </form>
+  <?php endif; ?>
+</div>
+
+
+<!-- Modal Recuperación -->
+<div id="modalRecuperar" class="modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); justify-content:center; align-items:center;">
+  <div class="glass-card" style="max-width:360px;">
+    <span class="close" style="position:absolute; top:10px; right:20px; font-size:18px; cursor:pointer; color:#fff;" onclick="cerrarModal()">&times;</span>
+    <h2 style="text-align:center; color:#FDCA40;">Recuperar Contraseña</h2>
+    <form action="CONTROLADOR/RecuperarContrasena.php" method="POST">
+      <input type="email" name="correo" placeholder="Ingrese su correo registrado" required>
+      <button type="submit" class="modal-button">Recuperar</button>
+    </form>
   </div>
+</div>
 
-  <script>
-    const container = document.getElementById("container");
-    const toggleBtn = document.getElementById("toggleBtn");
 
-    toggleBtn.addEventListener("click", () => {
-      container.classList.toggle("active");
-      toggleBtn.textContent = container.classList.contains("active") ? "Iniciar Sesión" : "Registrarse";
+<script>
+  function validarNombre(input) {
+    const regex = /^[A-ZÁÉÍÓÚÑ\s]*$/;
+    input.value = input.value.toUpperCase();
+    document.getElementById('errorNombre')?.remove();
+    if (!regex.test(input.value)) {
+      const error = document.createElement('div');
+      error.id = 'errorNombre';
+      error.className = 'mensaje-error';
+      error.innerText = 'Nombre incorrecto';
+      input.parentNode.insertBefore(error, input.nextSibling);
+    }
+  }
+
+  function validarCorreo(input) {
+    const mensaje = document.getElementById("mensajeCorreo");
+    const regex = /^[^\s@]+@(gmail\.com|hotmail\.com|icloud\.com)$/;
+    mensaje.textContent = !regex.test(input.value) ? "Correo inválido" : "";
+  }
+
+  function formatearTelefono(input) {
+    const mensaje = document.getElementById("mensajeTelefono");
+    let valor = input.value.replace(/\D/g, '');
+    valor = valor.slice(0, 10);
+    let formateado = valor.match(/.{1,3}/g)?.join(' ') || '';
+    input.value = formateado.trim();
+    mensaje.style.display = (valor.length < 10 && valor.length > 0) ? "block" : "none";
+    mensaje.textContent = valor.length < 10 ? "Teléfono incorrecto" : "";
+  }
+
+  function formatearDireccion(input) {
+    input.value = input.value.toUpperCase();
+  }
+
+  function abrirModal() {
+    document.getElementById('modalRecuperar').style.display = 'flex';
+  }
+
+  function cerrarModal() {
+    document.getElementById('modalRecuperar').style.display = 'none';
+  }
+
+  function mostrarFormulario() {
+    document.getElementById('pantallaInicial').classList.add('oculto');
+    document.getElementById('formularioRegistro').classList.remove('oculto');
+  }
+
+  window.onclick = function(event) {
+    const modal = document.getElementById('modalRecuperar');
+    if (event.target == modal) modal.style.display = "none";
+  }
+
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const inputPassword = document.querySelector('input[name="contrasena"]');
+    const inputConfirmar = document.querySelector('input[name="confirmar_contrasena"]');
+
+    const mensajePassword = document.createElement("div");
+    mensajePassword.classList.add("mensaje-error");
+    inputPassword.parentNode.insertBefore(mensajePassword, inputPassword.nextSibling);
+
+    const mensajeConfirmar = document.createElement("div");
+    mensajeConfirmar.classList.add("mensaje-error");
+    inputConfirmar.parentNode.insertBefore(mensajeConfirmar, inputConfirmar.nextSibling);
+
+    inputPassword.addEventListener("focus", () => {
+      validarPassword();
     });
+
+    inputPassword.addEventListener("input", () => {
+      // Limitar a 8 caracteres
+      inputPassword.value = inputPassword.value.slice(0, 8);
+      validarPassword();
+    });
+
+   inputConfirmar.addEventListener("input", () => {
+    // Limitar a 8 caracteres en confirmar contraseña
+    inputConfirmar.value = inputConfirmar.value.slice(0, 8);
+    validarCoincidencia();
+  });
+
+    function validarPassword() {
+      const valor = inputPassword.value;
+
+      let mensajes = [];
+
+      if (valor.length === 0) {
+        mensajes.push("Debe iniciar con una letra mayúscula, contener letras, números y caracteres. Máximo 8 caracteres.");
+      } else {
+        if (!/^[A-Z]/.test(valor)) mensajes.push("Debe iniciar con una letra mayúscula.");
+        if (!/^[A-Za-z0-9!@#$%^&*()_+={}[\]:;<>,.?~\\/-]{1,8}$/.test(valor)) mensajes.push("Sólo se permiten letras, números y caracteres especiales.");
+        if (valor.length < 8) mensajes.push("Debe tener exactamente 8 caracteres.");
+      }
+
+      mensajePassword.textContent = mensajes.join(" ");
+      mensajePassword.className = mensajes.length > 0 ? "mensaje-error" : "mensaje-exito";
+      if (mensajes.length === 0) mensajePassword.textContent = "Contraseña válida";
+    }
+
+    function validarCoincidencia() {
+      const pass = inputPassword.value;
+      const confirm = inputConfirmar.value;
+
+      if (confirm === "") {
+        mensajeConfirmar.textContent = "";
+        return;
+      }
+
+      if (pass === confirm) {
+        mensajeConfirmar.textContent = "Las contraseñas coinciden.";
+        mensajeConfirmar.className = "mensaje-exito";
+      } else {
+        mensajeConfirmar.textContent = "Las contraseñas no coinciden.";
+        mensajeConfirmar.className = "mensaje-error";
+      }
+    }
+  });
+
+  
+</script>
+
+<?php if (isset($_GET['registro']) && $_GET['registro'] === 'exito'): ?>
+  <div id="modalRegistro" class="modal-overlay">
+    <div class="glass-card">
+      <span class="modal-close" onclick="cerrarModalRegistro()">&times;</span>
+      <h2 style="text-align:center; color:#FDCA40;">¡Registro Exitoso!</h2>
+      <p style="text-align:center;">El administrador ha sido registrado correctamente. Ahora puedes iniciar sesión.</p>
+      <button class="modal-button" onclick="cerrarModalRegistro()">Aceptar</button>
+    </div>
+  </div>
+  <script>
+    function cerrarModalRegistro() {
+      const modal = document.getElementById('modalRegistro');
+      modal.style.display = 'none';
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   </script>
+<?php endif; ?>
+
+<?php if (isset($_GET['recuperacion'])): ?>
+  <div class="modal-overlay">
+    <div class="glass-card">
+      <span class="modal-close" onclick="this.parentElement.parentElement.remove()">×</span>
+      <?php if ($_GET['recuperacion'] === 'ok'): ?>
+        <h2 style="text-align:center; color:#FDCA40;">¡Correo encontrado!</h2>
+        <p style="text-align:center;">Hemos enviado un enlace para restablecer tu contraseña (simulado).</p>
+      <?php else: ?>
+        <h2 style="text-align:center; color:#ff6b6b;">Correo no encontrado</h2>
+        <p style="text-align:center;">El correo que ingresaste no está registrado en el sistema.</p>
+      <?php endif; ?>
+    </div>
+  </div>
+<?php endif; ?>
+
+
 </body>
 </html>

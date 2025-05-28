@@ -1,8 +1,3 @@
-<?php
-session_start();
-$nombre = $_SESSION['nombre'] ?? '';
-$correo = $_SESSION['correo'] ?? '';
-?>
 
 <!DOCTYPE html>
 <html lang="es">
@@ -211,18 +206,22 @@ button.save-btn:hover {
   box-shadow: 0 6px 14px #151718;
 }
 
-.wave {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 140px;
-  z-index: -1;
-}
+  /* Fondo decorativo onda */
+  .wave {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      z-index: -1;
+    }
 
   </style>
 </head>
 <body>
+   <svg class="wave" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+      <path fill="#2176FF" fill-opacity="0.2"
+        d="M0,192L60,181.3C120,171,240,149,360,154.7C480,160,600,192,720,192C840,192,960,160,1080,154.7C1200,149,1320,171,1380,181.3L1440,192L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"></path>
+    </svg>
   <div class="sidebar">
     <h2>SANSARA</h2><br>
       <a href="REGISTRO_DE_USUARIOS.php"><i class="fas fa-user-shield"></i><span>Registrar Usuarios</span></a>
@@ -233,20 +232,46 @@ button.save-btn:hover {
       <a href="CERRAR_SESION.php"><i class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span></a>
   </div>
 
-  <div class="content">
+ <div class="content">
     <h2>Configuración del Sistema</h2>
+
+    <?php if (isset($_GET['error'])): ?>
+      <div style="color: red; margin-bottom: 15px;">
+        <?php echo htmlspecialchars($_GET['error']); ?>
+      </div>
+    <?php endif; ?>
+
+    <?php if (isset($_GET['success'])): ?>
+      <div style="color: green; margin-bottom: 15px;">
+        Cambios guardados correctamente.
+      </div>
+    <?php endif; ?>
+
     <div class="tabs">
       <button class="tab-btn active" onclick="showTab(event, 'perfil')">Perfil</button>
       <button class="tab-btn" onclick="showTab(event, 'apariencia')">Apariencia</button>
     </div>
+    
+ <form method="POST" action="Configuracion.php">
+    <!-- Campo de nombre (deshabilitado al inicio) -->
+    <label for="nombre">Nombre de usuario:</label>
+    <input type="text" id="nombre" name="nombre" value="<?php echo htmlspecialchars($_SESSION['nombre']); ?>" disabled required />
+    <button type="button" onclick="document.getElementById('nombre').disabled = false;">Cambiar nombre de usuario</button>
 
-    <div id="perfil" class="config-section active">
-      <label>Nombre</label>
-      <input type="text" placeholder="Nombre de usuario" value="<?php echo htmlspecialchars($nombre); ?>" />
+    <!-- Campo oculto para conservar el nombre anterior -->
+    <input type="hidden" name="nombre_anterior" value="<?php echo htmlspecialchars($_SESSION['nombre']); ?>" />
 
-      <label>Correo electrónico</label>
-      <input type="email" placeholder="correo@ejemplo.com" value="<?php echo htmlspecialchars($correo); ?>" />
-    </div>
+    <!-- Campo de correo (deshabilitado al inicio) -->
+    <label for="correo">Correo:</label>
+    <input type="email" id="correo" name="correo" value="<?php echo htmlspecialchars($_SESSION['correo']); ?>" disabled required />
+    <button type="button" onclick="document.getElementById('correo').disabled = false;">Cambiar correo electrónico</button>
+
+    <br><br>
+    <!-- Botón de guardar -->
+    <button type="submit">Guardar cambios</button>
+</form>
+
+
 
     <div id="apariencia" class="config-section">
       <label>Tema</label>
@@ -262,15 +287,10 @@ button.save-btn:hover {
       </select>
     </div>
 
-    <div class="button-group">
-      <button class="save-btn">Guardar Cambios</button>
-    </div>
+ <form method="POST" action="index.php" enctype="multipart/form-data">
 
-    <svg class="wave" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
-      <path fill="#2176FF" fill-opacity="0.2"
-        d="M0,192L60,181.3C120,171,240,149,360,154.7C480,160,600,192,720,192C840,192,960,160,1080,154.7C1200,149,1320,171,1380,181.3L1440,192L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z">
-      </path>
-    </svg>
+    <!-- SVG wave y demás -->
+
   </div>
 
   <script>
@@ -281,11 +301,79 @@ button.save-btn:hover {
       event.currentTarget.classList.add('active');
     }
 
+    window.addEventListener('DOMContentLoaded', () => {
+      const btnCambiarPass = document.getElementById('btn-cambiar-pass');
+      const contenedorNuevaPass = document.getElementById('nueva-pass-container');
+
+      btnCambiarPass.addEventListener('click', () => {
+        if (contenedorNuevaPass.style.display === 'none' || contenedorNuevaPass.style.display === '') {
+          contenedorNuevaPass.style.display = 'block';
+        } else {
+          contenedorNuevaPass.style.display = 'none';
+        }
+      });
+
+      // Aplica preferencias guardadas
+      aplicarPreferencias();
+    });
+
     function aplicarConfiguracion() {
+      const tema = document.getElementById('theme-selector').value;
+      const fuente = document.getElementById('font-size-selector').value;
+
+      localStorage.setItem('tema', tema);
+      localStorage.setItem('fuente', fuente);
+
+      aplicarPreferencias();
+    }
+
+    function aplicarPreferencias() {
+      const tema = localStorage.getItem('tema') || 'light';
+      const fuente = localStorage.getItem('fuente') || 'medium';
+
+      document.body.classList.remove('dark-theme', 'font-small', 'font-medium', 'font-large');
+
+      if (tema === 'dark') {
+        document.body.classList.add('dark-theme');
+      }
+
+      document.body.classList.add(`font-${fuente}`);
+
+      document.getElementById('theme-selector').value = tema;
+      document.getElementById('font-size-selector').value = fuente;
+    }
+
+    document.querySelector('.save-btn').addEventListener('click', aplicarConfiguracion);
+  </script>
+<script>
+  function showTab(event, id) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.config-section').forEach(sec => sec.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+
+  function habilitarCampo(idCampo) {
+    const campo = document.getElementById(idCampo);
+    campo.disabled = false;
+    campo.focus();
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const btnCambiarPass = document.getElementById('btn-cambiar-pass');
+    const contenedorNuevaPass = document.getElementById('contenedor-pass');
+
+    btnCambiarPass.addEventListener('click', () => {
+      contenedorNuevaPass.style.display = contenedorNuevaPass.style.display === 'block' ? 'none' : 'block';
+    });
+
+    aplicarPreferencias();
+  });
+
+  function aplicarConfiguracion() {
     const tema = document.getElementById('theme-selector').value;
     const fuente = document.getElementById('font-size-selector').value;
 
-    // Guardar preferencias en localStorage
     localStorage.setItem('tema', tema);
     localStorage.setItem('fuente', fuente);
 
@@ -297,21 +385,17 @@ button.save-btn:hover {
     const fuente = localStorage.getItem('fuente') || 'medium';
 
     document.body.classList.remove('dark-theme', 'font-small', 'font-medium', 'font-large');
-
-    if (tema === 'dark') {
-      document.body.classList.add('dark-theme');
-    }
-
+    if (tema === 'dark') document.body.classList.add('dark-theme');
     document.body.classList.add(`font-${fuente}`);
 
-    // Actualiza los selectores
     document.getElementById('theme-selector').value = tema;
     document.getElementById('font-size-selector').value = fuente;
   }
 
   document.querySelector('.save-btn').addEventListener('click', aplicarConfiguracion);
-  window.addEventListener('DOMContentLoaded', aplicarPreferencias);
-  </script>
-  
+
+
+</script>
+
 </body>
 </html>

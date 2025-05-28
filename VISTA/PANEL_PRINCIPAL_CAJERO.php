@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'cajero') {
-    header("Location: ../VISTA/INICIO_SESION.php");
+    header("Location: ..index.php");
     exit();
 }
 
@@ -161,18 +161,18 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'cajero') {
 
   <div class="sidebar">
     <h2>SANSARA</h2><br>
-    <a href="REGISTRARVENTASCAJERO.html"><i class="fas fa-cash-register"></i><span>Registrar Venta</span></a>
-    <a href="PROCESARPAGOCAJERO.html"><i class="fas fa-credit-card"></i><span>Procesar Pago</span></a>
-    <a href="DEVOLUCIONESCAJERO.html"><i class="fas fa-undo-alt"></i><span>Devoluciones</span></a>
-    <a href="CONSULTARSTOCKCAJERO.html"><i class="fas fa-boxes"></i><span>Consultar Stock</span></a>
-    <a href="TRASPASOPRODUCTOSCAJERO.html"><i class="fas fa-box-open"></i><span>Traspaso de Producto</span></a>
-    <a href="CERRARSESION.html"><i class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span></a>
+    <a href="REGISTRAR_VENTAS.php"><i class="fas fa-cash-register"></i><span>Registrar Venta</span></a>
+    <a href="PROCESAR_PAGO.php"><i class="fas fa-credit-card"></i><span>Procesar Pago</span></a>
+    <a href="DEVOLUCIONES.php"><i class="fas fa-undo-alt"></i><span>Devoluciones</span></a>
+        <a href="CONSULTARSTOCKCAJERO.html"><i class="fas fa-boxes"></i><span>Consultar Stock</span></a>
+        <a href="CERRARSESION.html"><i class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span></a>
   </div>
 
   <div class="content">
     <div class="welcome">
         <h2><i class="	fas fa-user-shield"></i> BIENVENIDO CAJERO</h2>
       <p>Seleccione una opción del menú para gestionar ventas y pagos.</p>
+      <p style="margin-top: 10px; color: #666;">Sesión iniciada como: <strong><?php echo $_SESSION['nombre']; ?></strong></p>
     </div>
     <svg class="wave" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
       <path fill="#2176FF" fill-opacity="0.2" d="M0,192L60,181.3C120,171,240,149,360,154.7C480,160,600,192,720,192C840,192,960,160,1080,154.7C1200,149,1320,171,1380,181.3L1440,192L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"></path>

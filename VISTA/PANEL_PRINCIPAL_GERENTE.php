@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'gerente') {
-    header("Location: ../VISTA/INICIO_SESION.php");
+     header("Location: ../index.php");
     exit();
 }
 ?>
@@ -200,10 +200,10 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'gerente') {
 <body>
   <div class="sidebar">
     <h2>SANSARA</h2>
-    <a href="SUPERVISARVENTASG.html"><i class="	fas fa-cash-register"></i><span>Supervisión de Ventas</span></a>
-    <a href="CONTROLINVENTARIOGEREN.html"><i class="fas fa-boxes-stacked"></i><span>Control de Inventario</span></a>
+    <a href="SUPERVISION_VENTAS.php"><i class="	fas fa-cash-register"></i><span>Supervisión de Ventas</span></a>
+    <a href="CONTROL_INVENTARIO_GERENTE.php"><i class="fas fa-boxes-stacked"></i><span>Control de Inventario</span></a>
     <a href="REGISTRAR_PRODUCTOS.php"><i class="fas fa-box-open"></i><span>Registrar Productos</span></a> 
-    <a href="REPORTESGERENTE.html"><i class="fas fa-chart-bar"></i><span>Reportes</span></a>
+    <a href="REPORTES_GEREN.php"><i class="fas fa-chart-bar"></i><span>Reportes</span></a>
     <a href="CERRAR_SESION.php"><i class="	fas fa-right-from-bracket"></i><span>Cerrar Sesión</span></a>
   </div>
 
@@ -211,6 +211,7 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'gerente') {
     <div class="welcome">
       <h2><i class="	fas fa-user-shield"></i> BIENVENIDO GERENTE</h2>
       <p>Seleccione una opción del menú para supervisar las operaciones de Sansara.</p>
+      <p style="margin-top: 10px; color: #666;">Sesión iniciada como: <strong><?php echo $_SESSION['nombre']; ?></strong></p>
     </div>
     <svg class="wave" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
       <path fill="#28a745" fill-opacity="0.2" d="M0,192L60,181.3C120,171,240,149,360,154.7C480,160,600,192,720,192C840,192,960,160,1080,154.7C1200,149,1320,171,1380,181.3L1440,192L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"></path>

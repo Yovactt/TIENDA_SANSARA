@@ -12,15 +12,9 @@ $contrasena = $_POST['contrasena'] ?? '';
 $confirmar = $_POST['confirmar'] ?? '';
 $rol = $_POST['rol'] ?? null;
 
-// Validar nombre (solo letras y espacios)
-if (!preg_match("/^[A-ZÁÉÍÓÚÑ ]+$/", $nombre)) {
-    echo "<script>alert('El nombre solo debe contener letras y espacios.'); window.history.back();</script>";
-    exit;
-}
-
-// Verificar que las contraseñas coincidan
+// Validar que las contraseñas coincidan (opcional pero recomendable)
 if ($contrasena !== $confirmar) {
-    echo "<script>alert('Las contraseñas no coinciden.'); window.history.back();</script>";
+    header("Location: ../VISTA/REGISTRO_DE_USUARIOS.php?error=contrasena_no_coincide");
     exit;
 }
 
@@ -31,14 +25,15 @@ $stmt->bindParam(':correo', $correo);
 $stmt->execute();
 
 if ($stmt->rowCount() > 0) {
-    echo "<script>alert('El correo ya está registrado.'); window.history.back();</script>";
+    // Si el correo ya existe, redirigir con error
+    header("Location: ../VISTA/REGISTRO_DE_USUARIOS.php?error=correo_existe");
     exit;
 }
 
 // Encriptar contraseña
 $password_hashed = password_hash($contrasena, PASSWORD_DEFAULT);
 
-// Insertar usuario
+// Insertar nuevo usuario
 $sql_insertar = "INSERT INTO usuarios (nombre, correo, telefono, direccion, contrasena, rol) 
                  VALUES (:nombre, :correo, :telefono, :direccion, :contrasena, :rol)";
 $stmt = $conn->prepare($sql_insertar);
@@ -50,8 +45,10 @@ $stmt->bindParam(':contrasena', $password_hashed);
 $stmt->bindParam(':rol', $rol);
 
 if ($stmt->execute()) {
-    echo "<script>alert('Usuario registrado correctamente.'); window.location.href='../VISTA/REGISTRO_DE_USUARIOS.php';</script>";
+    header("Location: ../VISTA/REGISTRO_DE_USUARIOS.php?registro=exito");
+    exit;
 } else {
-    echo "<script>alert('Error al registrar el usuario.'); window.history.back();</script>";
+    header("Location: ../VISTA/REGISTRO_DE_USUARIOS.php?error=registro_fallido");
+    exit;
 }
 ?>

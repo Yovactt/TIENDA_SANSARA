@@ -8,7 +8,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $color = trim($_POST["color"] ?? '');
     $talla = trim($_POST["talla"] ?? '');
     $marca = trim($_POST["marca"] ?? '');
-    $etiqueta = trim($_POST["etiqueta"] ?? '');
+  $etiqueta = trim($_POST["etiqueta"] ?? '');
+
+if (empty($etiqueta)) {
+    $nombreCategoria = [
+        1 => 'Dama', 2 => 'Caballero', 3 => 'Niño', 4 => 'Niña', 5 => 'Sandalia', 6 => 'Chachara'
+    ][$categoria_id] ?? 'General';
+
+    $etiqueta = substr(time(), -5); // solo los últimos 5 dígitos
+
+}
+
     $categoria_id = isset($_POST["categoria_id"]) ? (int)$_POST["categoria_id"] : null;
     $sucursal = trim($_POST["sucursal"] ?? '');
     $cantidad = trim($_POST["cantidad"] ?? '');

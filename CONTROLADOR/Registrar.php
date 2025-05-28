@@ -32,8 +32,9 @@ if (count($resultado) > 0) {
         ':rol' => $rol
     ];
 
-    if ($stmt->execute($params)) {
-        echo "<script>alert('Administrador registrado correctamente. Puedes iniciar sesión.'); window.location.href='../index.php';</script>";
+   if ($stmt->execute($params)) {
+    header("Location: ../index.php?registro=exito");
+    exit();
     } else {
         $error = $stmt->errorInfo();
         echo "Error: " . $error[2];

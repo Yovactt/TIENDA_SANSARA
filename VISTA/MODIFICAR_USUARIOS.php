@@ -231,7 +231,168 @@ body.font-small { font-size: 10px; }
 body.font-medium { font-size: 16px; }
 body.font-large { font-size: 22px; }
 
-  </style>
+  /* Fondo decorativo onda */
+  .wave {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      z-index: -1;
+    }
+
+
+     /*reposive*/
+    /* Celulares (pantallas pequeñas hasta 600px) */
+@media (max-width: 600px) {
+  body {
+    flex-direction: column;
+    height: auto;
+    overflow: auto;
+  }
+
+  .sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 10px 0;
+  }
+
+  .sidebar:hover {
+    width: 100%;
+  }
+
+  .sidebar h2 {
+    display: none;
+  }
+
+  .sidebar a {
+    justify-content: center;
+    flex-direction: column;
+    padding: 10px;
+  }
+
+  .sidebar i {
+    font-size: 18px;
+  }
+
+  .sidebar span {
+    opacity: 1 !important;
+    font-size: 12px;
+    margin-left: 0;
+    margin-top: 5px;
+  }
+
+  .content {
+    margin-left: 0;
+    padding: 20px;
+  }
+
+  .form-container {
+    margin: 0 auto;
+    width: 90%;
+    padding: 15px;
+  }
+
+  h2 {
+    font-size: 18px;
+    text-align: center;
+  }
+
+  .button {
+    width: 100%;
+    font-size: 14px;
+  }
+
+  .wave {
+    display: none;
+  }
+}
+
+/* Tablets (600px - 1024px) */
+@media (min-width: 601px) and (max-width: 1024px) {
+  .sidebar {
+    width: 80px;
+  }
+
+  .sidebar:hover {
+    width: 200px;
+  }
+
+  .content {
+    margin-left: 80px;
+    padding: 40px;
+  }
+
+  .sidebar:hover ~ .content {
+    margin-left: 200px;
+  }
+
+  .form-container {
+    width: 80%;
+    margin: 0 auto;
+  }
+}
+
+
+ /* Modal de fondo */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Tarjeta con estilo de cristal */
+.glass-card {
+  max-width: 400px;
+  background: rgba(15, 34, 204, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 30px 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  position: relative;
+  color: #fff;
+}
+
+/* Botón cerrar (X) */
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 18px;
+  cursor: pointer;
+  color: #fff;
+}
+
+.modal-button {
+  display: block;
+  margin: 20px auto 0;
+  padding: 8px 20px;
+  background: linear-gradient(to right, #F79824, #FDCA40);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s ease;
+}
+
+.modal-button:hover {
+  background-color: #FDCA40;
+  color: #000;
+}
+
+</style>
 
   <script>
     function habilitarEdicion(id) {
@@ -242,7 +403,9 @@ body.font-large { font-size: 22px; }
   </script>
 </head>
 <body>
-
+  <svg class="wave" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+    <path fill="#28a745" fill-opacity="0.2" d="M0,192L60,181.3C120,171,240,149,360,154.7C480,160,600,192,720,192C840,192,960,160,1080,154.7C1200,149,1320,171,1380,181.3L1440,192L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"></path>
+  </svg>
 <!-- Sidebar -->
 <div class="sidebar">
   <h2>SANSARA</h2><br>
@@ -294,18 +457,24 @@ body.font-large { font-size: 22px; }
         <button type="submit" class="btn-accion">Guardar</button>
     </form>
 
-    <!-- Formulario para Eliminar -->
-    <form method="POST" action="../CONTROLADOR/EliminarUsuarios.php" onsubmit="return confirm('¿Seguro que quieres eliminar este usuario?');">
+   <?php foreach ($usuarios as $usuario): ?>
+  <tr>
+    <td><?= htmlspecialchars($usuario['id_usuario']) ?></td>
+    <td><?= htmlspecialchars($usuario['nombre']) ?></td>
+    <td><?= htmlspecialchars($usuario['correo']) ?></td>
+    <!-- Acciones -->
+    <td>
+      <!-- Formulario para Eliminar -->
+      <form method="POST" action="../CONTROLADOR/EliminarUsuarios.php" onsubmit="return confirm('¿Seguro que quieres eliminar este usuario?');" style="display:inline;">
         <input type="hidden" name="id" value="<?= $usuario['id_usuario'] ?>">
         <button type="submit" class="btn-accion">Eliminar</button>
-    </form>
-      </td>
+      </form>
+    </td>
   </tr>
-  <?php endforeach; ?>
-      </tbody>
-    </table>
-  </div>
-</div>
+<?php endforeach; ?>
+
+
+
 <script>
   function aplicarPreferencias() {
     const tema = localStorage.getItem('tema') || 'light';
@@ -322,6 +491,44 @@ body.font-large { font-size: 22px; }
 
   window.addEventListener('DOMContentLoaded', aplicarPreferencias);
 </script>
+
+<?php if (isset($_GET['mensaje']) && $_GET['mensaje'] === 'exito'): ?>
+  <div id="modalModificar" class="modal-overlay">
+    <div class="glass-card">
+      <span class="modal-close" onclick="cerrarModalModificar()">&times;</span>
+      <h2 style="text-align:center; color:#FDCA40;">¡Modificación Exitosa!</h2>
+      <p style="text-align:center;">El usuario fue modificado correctamente.</p>
+            <button class="modal-button" onclick="cerrarModalModificar()">Cerrar</button>
+    </div>
+  </div>
+  <script>
+    function cerrarModalModificar() {
+      const modal = document.getElementById('modalModificar');
+      modal.style.display = 'none';
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  </script>
+<?php endif; ?>
+
+
+<?php if (isset($_GET['mensaje_eliminar']) && $_GET['mensaje_eliminar'] === 'exito'): ?>
+  <div id="modalEliminar" class="modal-overlay">
+    <div class="glass-card">
+      <span class="modal-close" onclick="cerrarModalEliminar()">&times;</span>
+      <h2 style="text-align:center; color:#FDCA40;">¡Eliminación Exitosa!</h2>
+      <p style="text-align:center;">El usuario fue eliminado correctamente.p>
+            <button class="modal-button" onclick="cerrarModalEliminar()">Cerrar</button>
+    </div>
+  </div>
+  <script>
+    function cerrarModalEliminar() {
+      const modal = document.getElementById('modalEliminar');
+      modal.style.display = 'none';
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  </script>
+<?php endif; ?>
+
 
 </body>
 </html>

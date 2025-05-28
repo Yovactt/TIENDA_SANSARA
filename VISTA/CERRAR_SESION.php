@@ -76,7 +76,8 @@
     <p>¿Estás seguro de que deseas cerrar sesión de tu cuenta?</p>
     <div class="button-group">
     <a class="btn confirm" href="../CONTROLADOR/CerrarSesion.php">Sí, cerrar</a>
-      <a class="btn cancel">Cancelar</a>
+     <a class="btn cancel" href="#" onclick="cancelLogout()">Cancelar</a>
+
     </div>
   </div>
 
@@ -86,5 +87,11 @@
       window.location.href = "../index.php"; // Cambia esto si tu login está en otra URL
     }
   </script>
+  <script>
+  function cancelLogout() {
+    window.history.back(); // Regresa a la página anterior
+  }
+</script>
+
 </body>
 </html>
