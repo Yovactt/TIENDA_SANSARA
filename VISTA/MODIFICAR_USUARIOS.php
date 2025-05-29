@@ -428,7 +428,8 @@ body.font-large { font-size: 22px; }
   <div class="modal-overlay" id="mensajeModal">
     <div class="glass-card">
       <span class="modal-close" onclick="cerrarModal()">×</span>
-      <h3>Usuario eliminado correctamente</h3>
+      <h2 style="text-align:center; color:#FDCA40;">Eliminacion Completada</h2>
+       <p style="text-align:center;">Usuario eliminado correctamente</p>
       <button class="modal-button" onclick="cerrarModal()">Aceptar</button>
     </div>
   </div>
