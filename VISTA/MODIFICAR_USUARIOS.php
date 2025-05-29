@@ -239,6 +239,60 @@ body.font-large { font-size: 22px; }
       width: 100%;
       z-index: -1;
     }
+
+    
+    /* Modal de fondo */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Tarjeta con estilo de cristal */
+.glass-card {
+  max-width: 400px;
+  background: rgba(15, 34, 204, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 30px 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  position: relative;
+  color: #fff;
+}
+
+/* Botón cerrar (X) */
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 18px;
+  cursor: pointer;
+  color: #fff;
+}
+
+/* Botón aceptar */
+.modal-button {
+  display: block;
+  margin: 20px auto 0;
+  padding: 8px 20px;
+  background: linear-gradient(to right, #F79824, #FDCA40);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.modal-button:hover {
+  background-color: #e0b134;
+}
   </style>
 
   <script>
@@ -304,17 +358,20 @@ body.font-large { font-size: 22px; }
         <button type="submit" class="btn-accion">Guardar</button>
     </form>
 
-    <!-- Formulario para Eliminar -->
-    <form method="POST" action="../CONTROLADOR/EliminarUsuarios.php" onsubmit="return confirm('¿Seguro que quieres eliminar este usuario?');">
+   <!-- Formulario para Eliminar -->
+      <form method="POST" action="../CONTROLADOR/EliminarUsuarios.php" class="form-eliminar">
         <input type="hidden" name="id" value="<?= $usuario['id_usuario'] ?>">
-        <button type="submit" class="btn-accion">Eliminar</button>
-    </form>
+        <button type="button" class="btn-accion" onclick="confirmarEliminacion(this) ">Eliminar</button>
+      </form>
+
       </td>
   </tr>
   <?php endforeach; ?>
       </tbody>
     </table>
 </div>
+
+
 <script>
   function aplicarPreferencias() {
     const tema = localStorage.getItem('tema') || 'light';
@@ -331,6 +388,58 @@ body.font-large { font-size: 22px; }
 
   window.addEventListener('DOMContentLoaded', aplicarPreferencias);
 </script>
+
+<!-- Modal de Confirmación de Eliminación -->
+<div id="modalEliminar" class="modal-overlay" style="display: none;">
+  <div class="glass-card">
+    <span class="modal-close" onclick="cerrarModalEliminar()">&times;</span>
+    <h2 style="text-align:center; color:#FDCA40;">¿Eliminar Usuario?</h2>
+    <p style="text-align:center;">¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.</p>
+    <div style="text-align:center; margin-top: 20px;">
+      <button class="modal-button" onclick="enviarFormularioEliminar()">Sí, eliminar</button>
+      <button class="modal-button" onclick="cerrarModalEliminar()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let formularioAEliminar = null;
+
+  function confirmarEliminacion(boton) {
+    formularioAEliminar = boton.closest('form');
+    const modal = document.getElementById('modalEliminar');
+    modal.style.display = 'flex';
+  }
+
+  function cerrarModalEliminar() {
+    document.getElementById('modalEliminar').style.display = 'none';
+    formularioAEliminar = null;
+  }
+
+  function enviarFormularioEliminar() {
+    if (formularioAEliminar) {
+      formularioAEliminar.submit();
+    }
+  }
+</script>
+
+<!-- Modal de Confirmación de Eliminación Exitosa -->
+<?php if (isset($_GET['mensaje']) && $_GET['mensaje'] === 'eliminado'): ?>
+  <div class="modal-overlay" id="mensajeModal">
+    <div class="glass-card">
+      <span class="modal-close" onclick="cerrarModal()">×</span>
+      <h3>Usuario eliminado correctamente</h3>
+      <button class="modal-button" onclick="cerrarModal()">Aceptar</button>
+    </div>
+  </div>
+
+  <script>
+    function cerrarModal() {
+      document.getElementById("mensajeModal").style.display = "none";
+    }
+  </script>
+<?php endif; ?>
+
 
 </body>
 </html>
