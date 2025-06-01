@@ -1,16 +1,14 @@
 <?php
-require_once '../MODELO/Conexion.php';
-$conexion = conectar();
-$sql = "SELECT * FROM usuarios WHERE rol != 'administrador'";
-$usuarios = $conexion->query($sql);
-?>
-
-<?php
 session_start();
 if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'administrador') {
     header("Location: ../index.php");
     exit();
 }
+
+require_once '../MODELO/Conexion.php';
+$conexion = conectar();
+$sql = "SELECT * FROM usuarios WHERE rol != 'administrador'";
+$usuarios = $conexion->query($sql);
 ?>
 
 <!DOCTYPE html>
