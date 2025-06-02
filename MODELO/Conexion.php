@@ -11,6 +11,10 @@ function conectar() {
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         ]);
+
+        // Establecer zona horaria en la sesión de PostgreSQL
+        $conn->exec("SET TIME ZONE 'America/Mexico_City'");
+
         return $conn;
     } catch (PDOException $e) {
         die("Error de conexión: " . $e->getMessage());

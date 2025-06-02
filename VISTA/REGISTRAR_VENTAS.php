@@ -452,116 +452,115 @@
     </div>
   </div>
 
-  <script>
-    let totalVenta = 0;
+<script>
+  let totalVenta = 0;
 
-    function agregarProducto() {
-      let codigo = document.getElementById("producto").value.trim();
-      let modelo = document.getElementById("modelo").value.trim();
-      let cantidad = parseInt(document.getElementById("cantidad").value);
-      let precioUnitario = parseFloat(document.getElementById("precio").value);
-      let total = cantidad * precioUnitario;
-      totalVenta += total;
+  function agregarProducto() {
+    let codigo = document.getElementById("producto").value.trim();
+    let modelo = document.getElementById("modelo").value.trim();
+    let cantidad = parseInt(document.getElementById("cantidad").value);
+    let precioUnitario = parseFloat(document.getElementById("precio").value);
+    let total = cantidad * precioUnitario;
+    totalVenta += total;
 
-      let tabla = document.getElementById("tablaVentas");
-      let fila = tabla.insertRow();
-      fila.innerHTML = `
-        <td>${codigo}</td>
-        <td>${modelo}</td>
-        <td>${cantidad}</td>
-        <td>$${precioUnitario.toFixed(2)}</td>
-        <td>$${total.toFixed(2)}</td>
-      `;
+    let tabla = document.getElementById("tablaVentas");
+    let fila = tabla.insertRow();
+    fila.innerHTML = `
+      <td>${codigo}</td>
+      <td>${modelo}</td>
+      <td>${cantidad}</td>
+      <td>$${precioUnitario.toFixed(2)}</td>
+      <td>$${total.toFixed(2)}</td>
+    `;
 
-      document.getElementById("total").textContent = totalVenta.toFixed(2);
+    document.getElementById("total").textContent = totalVenta.toFixed(2);
 
-      document.getElementById("producto").value = "";
-      document.getElementById("modelo").value = "";
-      document.getElementById("cantidad").value = "1";
-      document.getElementById("precio").value = "0";
-      document.getElementById("producto").focus();
-    }
+    document.getElementById("producto").value = "";
+    document.getElementById("modelo").value = "";
+    document.getElementById("cantidad").value = "1";
+    document.getElementById("precio").value = "0";
+    document.getElementById("producto").focus();
+  }
 
-    function eliminarProducto(btn, total) {
-      let fila = btn.parentNode.parentNode;
-      fila.parentNode.removeChild(fila);
-      totalVenta -= total;
-      document.getElementById("total").textContent = totalVenta.toFixed(2);
-    }
+  function eliminarProducto(btn, total) {
+    let fila = btn.parentNode.parentNode;
+    fila.parentNode.removeChild(fila);
+    totalVenta -= total;
+    document.getElementById("total").textContent = totalVenta.toFixed(2);
+  }
 
-    async function buscarProducto() {
-      const codigo = document.getElementById('producto').value.trim();
-      if (!codigo) return;
+  async function buscarProducto() {
+    const codigo = document.getElementById('producto').value.trim();
+    if (!codigo) return;
 
-      try {
-        const response = await fetch(`../CONTROLADOR/BuscarProducto.php?codigo=${encodeURIComponent(codigo)}`);
-        const data = await response.json();
+    try {
+      const response = await fetch(`../CONTROLADOR/BuscarProducto.php?codigo=${encodeURIComponent(codigo)}`);
+      const data = await response.json();
 
-        if (data.error) {
-          document.getElementById('modelo').value = '';
-          document.getElementById('precio').value = 0;
-          // Modal eliminado: no se hace nada
-        } else {
-          document.getElementById('modelo').value = data.modelo;
-          document.getElementById('precio').value = parseFloat(data.precio);
-        }
-      } catch (error) {
-        // Modal eliminado: no se hace nada
+      if (data.error) {
+        document.getElementById('modelo').value = '';
+        document.getElementById('precio').value = 0;
+      } else {
+        document.getElementById('modelo').value = data.modelo;
+        document.getElementById('precio').value = parseFloat(data.precio);
       }
+    } catch (error) {
+      // Error silenciado
     }
+  }
 
-    function calcularPrecioTotal() {
-      let cantidad = parseInt(document.getElementById('cantidad').value);
-      let precioUnitario = parseFloat(document.getElementById('precio').value);
-      if (isNaN(cantidad) || cantidad < 1) cantidad = 1;
-      if (isNaN(precioUnitario)) precioUnitario = 0;
-      document.getElementById('precio').value = precioUnitario.toFixed(2);
-    }
+  function calcularPrecioTotal() {
+    let cantidad = parseInt(document.getElementById('cantidad').value);
+    let precioUnitario = parseFloat(document.getElementById('precio').value);
+    if (isNaN(cantidad) || cantidad < 1) cantidad = 1;
+    if (isNaN(precioUnitario)) precioUnitario = 0;
+    document.getElementById('precio').value = precioUnitario.toFixed(2);
+  }
 
-    function procesarVenta() {
-      const boton = document.querySelector(".formulario-button");
-      boton.disabled = true;
+  function procesarVenta() {
+    const boton = document.querySelector(".formulario-button");
+    boton.disabled = true;
 
-      const filas = document.querySelectorAll("#tablaVentas tr");
-      const productos = [];
-      filas.forEach(fila => {
-        const celdas = fila.querySelectorAll("td");
-        const producto = {
-          producto: celdas[0].textContent,
-          modelo: celdas[1].textContent,
-          cantidad: parseInt(celdas[2].textContent),
-          precio_unitario: parseFloat(celdas[3].textContent.replace('$', '')),
-          total: parseFloat(celdas[4].textContent.replace('$', ''))
-        };
-        productos.push(producto);
-      });
-
-      const ventaData = {
-        productos: productos,
-        total: totalVenta
+    const filas = document.querySelectorAll("#tablaVentas tr");
+    const productos = [];
+    filas.forEach(fila => {
+      const celdas = fila.querySelectorAll("td");
+      const producto = {
+        producto: celdas[0].textContent,
+        modelo: celdas[1].textContent,
+        cantidad: parseInt(celdas[2].textContent),
+        precio_unitario: parseFloat(celdas[3].textContent.replace('$', '')),
+        total: parseFloat(celdas[4].textContent.replace('$', ''))
       };
+      productos.push(producto);
+    });
 
-      fetch("../CONTROLADOR/GuardarVenta.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(ventaData)
-      })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            // Modal eliminado: redirigir directamente
-            window.location.href = "PROCESAR_PAGO.php?id_venta=" + data.id_venta;
-          } else {
-            alert("Error al guardar venta: " + data.error);
-            boton.disabled = false;
-          }
-        })
-        .catch(error => {
-          alert("Error de conexión: " + error.message);
+    const ventaData = {
+      productos: productos,
+      total: totalVenta
+    };
+
+    fetch("../CONTROLADOR/GuardarVenta.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(ventaData)
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          window.location.href = "PROCESAR_PAGO.php?id_venta=" + data.id_venta;
+        } else {
+          // Error silenciado
           boton.disabled = false;
-        });
-    }
-  </script>
+        }
+      })
+      .catch(() => {
+        // Error silenciado
+        boton.disabled = false;
+      });
+  }
+</script>
+
 
 </body>
 

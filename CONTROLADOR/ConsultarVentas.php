@@ -2,6 +2,9 @@
 require_once '../MODELO/Conexion.php';
 $pdo = conectar();
 
+// Forzar zona horaria correcta en PHP
+date_default_timezone_set('America/Mexico_City');
+
 $inputJSON = file_get_contents('php://input');
 $input = json_decode($inputJSON, true);
 
@@ -27,7 +30,6 @@ JOIN detalles_venta d ON v.id_venta = d.id_venta
 WHERE DATE(v.fecha) = :fecha
 ";
 
-
 $params = [':fecha' => $fecha];
 
 if (!empty($sucursal)) {
@@ -45,5 +47,3 @@ try {
     http_response_code(500);
     echo json_encode(['error' => 'Error en la consulta: ' . $e->getMessage()]);
 }
-
-?>

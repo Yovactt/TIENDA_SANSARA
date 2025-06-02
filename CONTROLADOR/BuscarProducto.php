@@ -1,13 +1,18 @@
 <?php
 header('Content-Type: application/json');
 
+// Desactivar la visualización de errores
+ini_set('display_errors', 0);
+ini_set('display_startup_errors', 0);
+error_reporting(0);
+
 require_once('../MODELO/Conexion.php');
 
 try {
     $conn = conectar();
 
     if (!isset($_GET['codigo']) || trim($_GET['codigo']) === '') {
-        echo json_encode(['error' => 'Código vacío o no especificado']);
+        echo json_encode(['error' => 'Código inválido']);
         exit;
     }
 
@@ -26,10 +31,10 @@ try {
         echo json_encode(['error' => 'Producto no encontrado']);
     }
 
-    $conn = null; // Opcional: cerrar conexión
+    $conn = null;
 
 } catch (PDOException $e) {
-    error_log($e->getMessage()); // Guardar en log, no mostrar al usuario
-    echo json_encode(['error' => 'Error de base de datos']);
+    error_log($e->getMessage()); // Registrar en el log del servidor
+    echo json_encode(['error' => 'Error interno del servidor']);
 }
 ?>
