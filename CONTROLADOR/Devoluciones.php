@@ -2,6 +2,9 @@
 require_once '../MODELO/Conexion.php';
 $conn = conectar();
 
+// Establecer zona horaria correcta para PHP
+date_default_timezone_set('America/Mexico_City');
+
 header('Content-Type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -19,10 +22,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $producto = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($producto) {
-                // Insertar devolución
+                // Obtener fecha actual desde PHP
+                $fecha_actual = date('Y-m-d H:i:s');
+
+                // Insertar devolución con fecha generada por PHP
                 $stmtInsert = $conn->prepare("
                     INSERT INTO devoluciones (etiqueta, producto, talla, color, precio, cantidad, motivo, fecha)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 ");
                 $resultado = $stmtInsert->execute([
                     $etiqueta,
@@ -31,7 +37,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $producto['color'],
                     $producto['precio'],
                     $cantidad,
-                    $motivo
+                    $motivo,
+                    $fecha_actual
                 ]);
 
                 if ($resultado) {

@@ -1,6 +1,6 @@
-
 <?php
 require_once '../MODELO/Conexion.php';
+
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['id'], $_POST['nombre'], $_POST['correo'], $_POST['telefono'], $_POST['direccion'], $_POST['contrasena'], $_POST['rol'])) {
     
