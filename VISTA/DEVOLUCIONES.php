@@ -507,7 +507,7 @@
     </path>
   </svg>
 <script>
-  const urlBase = 'Devoluciones.php';
+  const urlBase = '/CONTROLADOR/Devoluciones.php';
 
   // Evento para cuando presionas Enter en el input etiqueta
   document.getElementById("etiqueta").addEventListener("keypress", function(e) {
