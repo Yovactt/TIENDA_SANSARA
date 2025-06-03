@@ -618,7 +618,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const input = document.querySelector(`input[data-id="${id}"]`);
       const cantidad = input.value;
 
-      fetch('ActualizarCantidad.php', {
+      fetch('/CONTROLADOR/ActualizarCantidad.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `id=${encodeURIComponent(id)}&cantidad=${encodeURIComponent(cantidad)}`
@@ -650,7 +650,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!confirmado) return; // Si cancela, no hacer nada
 
       // Si confirma, enviar petición para eliminar
-      fetch('EliminarProducto.php', {
+      fetch('/CONTROLADOR/EliminarProducto.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `id=${encodeURIComponent(id)}`
