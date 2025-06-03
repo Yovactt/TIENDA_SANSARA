@@ -7,7 +7,7 @@ ini_set('display_errors', 1);
 
 header('Content-Type: application/json');
 
-require_once 'MODELO/Conexion.php'; // Ajusta la ruta si es necesario
+require_once '../MODELO/Conexion.php'; // Ajusta la ruta si es necesario
 
 // Guardar log para depurar (opcional)
 file_put_contents('debug.log', "POST RECIBIDO: " . print_r($_POST, true), FILE_APPEND);
