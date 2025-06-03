@@ -426,25 +426,29 @@ $conn = null;
     <a href="CONSULTAR_INVENTARIO.php"><i class="fas fa-search"></i><span>Consultar producto</span></a>
     <a href="CERRAR_SESION.php"><i class="fas fa-sign-out-alt"></i><span>Cerrar sesión</span></a>
       </div>
- <div class="content">
-    <h2><i class="fas fa-boxes-stacked"></i> CONTROL DEL INVENTARIO</h2>
 
-    <!-- Filtros -->
-    <div class="filtros">
-      <input type="text" id="filtro-etiqueta" placeholder="Etiqueta">
-      <input type="text" id="filtro-modelo" placeholder="Modelo">
-      <input type="text" id="filtro-color" placeholder="Color">
-      <input type="text" id="filtro-talla" placeholder="Talla">
-      <select id="filtro-sucursal">
-        <option value="">Sucursal</option>
-        <option value="Sucursal1">Sucursal 1</option>
-        <option value="Sucursal2">Sucursal 2</option>
-        <option value="Sucursal3">Sucursal 3</option>
-        <option value="Sucursal4">Sucursal 4</option>
-      </select>
-    </div>
+  <!-- CONTENIDO PRINCIPAL -->
+  <div class="content">
+    <h2><i class="fas fa-boxes-stacked"></i> CONSULTAR STOCK</h2>
 
-    <!-- Tabla -->
+    <!-- Sección de filtros -->
+<div class="filtros">
+  <input type="text" id="filtro-etiqueta" placeholder="Etiqueta">
+  <input type="text" id="filtro-modelo" placeholder="Modelo">
+  <input type="text" id="filtro-color" placeholder="Color">
+  <input type="text" id="filtro-talla" placeholder="Talla">
+
+  <select id="filtro-sucursal">
+    <option value="">Sucursal</option>
+    <option value="Sucursal1">Sucursal 1</option>
+    <option value="Sucursal2">Sucursal 2</option>
+    <option value="Sucursal3">Sucursal 3</option>
+    <option value="Sucursal4">Sucursal 4</option>
+  </select>
+</div>
+
+
+    <!-- Tabla de resultados -->
     <div class="tabla-container">
       <table>
         <thead>
@@ -457,275 +461,134 @@ $conn = null;
             <th>Etiqueta</th>
             <th>Sucursal</th>
             <th>Cantidad</th>
-            <th>Acción</th>
           </tr>
         </thead>
         <tbody>
+          <!-- Mostrar productos dinámicamente -->
           <?php foreach ($productos as $producto): ?>
-          <tr>
-            <td><?= htmlspecialchars($producto['modelo']) ?></td>
-            <td><?= htmlspecialchars($producto['talla']) ?></td>
-            <td><?= htmlspecialchars($producto['color']) ?></td>
-            <td><?= htmlspecialchars($producto['precio']) ?></td>
-            <td><?= htmlspecialchars($producto['marca']) ?></td>
-            <td><?= htmlspecialchars($producto['etiqueta']) ?></td>
-            <td><?= htmlspecialchars($producto['sucursal']) ?></td>
-            <td>
-              <input type="number" value="<?= htmlspecialchars($producto['cantidad']) ?>"
-                     data-id="<?= $producto['id'] ?>" class="cantidad-input" min="0" disabled>
-            </td>
-            <td>
-<button class="editar-btn button" data-id="<?= $producto['id'] ?>">Editar</button>
-<button class="guardar-btn button" data-id="<?= $producto['id'] ?>" style="display:none;">Guardar</button>
-  <button class="eliminar-btn button" data-id="<?= $producto['id'] ?>">Eliminar</button>
-
-            </td>
-          </tr>
+            <tr>
+              <td><?php echo htmlspecialchars($producto['modelo']); ?></td>
+              <td><?php echo htmlspecialchars($producto['talla']); ?></td>
+              <td><?php echo htmlspecialchars($producto['color']); ?></td>
+              <td><?php echo htmlspecialchars($producto['precio']); ?></td>
+              <td><?php echo htmlspecialchars($producto['marca']); ?></td>
+              <td><?php echo htmlspecialchars($producto['etiqueta']); ?></td>
+              <td><?php echo htmlspecialchars($producto['sucursal']); ?></td>
+              <td><?php echo htmlspecialchars($producto['cantidad']); ?></td>
+            </tr>
           <?php endforeach; ?>
-
+          <!-- Si no hay productos, mostrar mensaje -->
           <?php if (empty($productos)): ?>
-          <tr><td colspan="9" style="text-align:center; color:#999;">Sin productos disponibles</td></tr>
+            <tr>
+              <td colspan="9" style="text-align:center; color: #999;">Sin productos disponibles</td>
+            </tr>
           <?php endif; ?>
         </tbody>
       </table>
     </div>
   </div>
-
-  <!-- Script: Filtro AJAX -->
   <script>
-    const inputs = ['filtro-etiqueta', 'filtro-modelo', 'filtro-color', 'filtro-talla', 'filtro-sucursal'];
-    inputs.forEach(id => {
-      const el = document.getElementById(id);
-      el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', filtrarProductos);
-    });
+  const inputs = [
+    'filtro-etiqueta',
+    'filtro-modelo',
+    'filtro-color',
+    'filtro-talla',
+    'filtro-sucursal'
+  ];
 
-    function filtrarProductos() {
-      const data = {
-        etiqueta: document.getElementById('filtro-etiqueta').value,
-        modelo: document.getElementById('filtro-modelo').value,
-        color: document.getElementById('filtro-color').value,
-        talla: document.getElementById('filtro-talla').value,
-        sucursal: document.getElementById('filtro-sucursal').value
-      };
-
-      fetch('FiltrarStock.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams(data)
-      })
-      .then(res => res.json())
-      .then(productos => {
-        const tbody = document.querySelector('table tbody');
-        tbody.innerHTML = '';
-
-        if (productos.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:#999;">Sin resultados</td></tr>`;
-          return;
-        }
-
-        productos.forEach(prod => {
-          tbody.innerHTML += `
-            <tr>
-              <td>${prod.modelo}</td>
-              <td>${prod.talla}</td>
-              <td>${prod.color}</td>
-              <td>${prod.precio}</td>
-              <td>${prod.marca}</td>
-              <td>${prod.etiqueta}</td>
-              <td>${prod.sucursal}</td>
-              <td>
-                <input type="number" value="${prod.cantidad}" data-id="${prod.id}" class="cantidad-input" min="0" disabled>
-              </td>
-              <td>
-                <button class="editar-btn" data-id="${prod.id}">Editar</button>
-                <button class="guardar-btn" data-id="${prod.id}" style="display:none;">Guardar</button>
-              </td>
-            </tr>`;
-        });
-      });
-    }
-  </script>
-
-  <!-- Script: Filtro de texto puro -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const filtros = {
-        etiqueta: document.getElementById("filtro-etiqueta"),
-        modelo: document.getElementById("filtro-modelo"),
-        color: document.getElementById("filtro-color"),
-        talla: document.getElementById("filtro-talla"),
-        sucursal: document.getElementById("filtro-sucursal")
-      };
-
-      const aplicarFiltros = () => {
-        const valores = {
-          etiqueta: filtros.etiqueta.value.toLowerCase(),
-          modelo: filtros.modelo.value.toLowerCase(),
-          color: filtros.color.value.toLowerCase(),
-          talla: filtros.talla.value.toLowerCase(),
-          sucursal: filtros.sucursal.value
-        };
-
-        document.querySelectorAll("tbody tr").forEach(fila => {
-          const datos = {
-            modelo: fila.cells[0].textContent.toLowerCase(),
-            talla: fila.cells[1].textContent.toLowerCase(),
-            color: fila.cells[2].textContent.toLowerCase(),
-            etiqueta: fila.cells[5].textContent.toLowerCase(),
-            sucursal: fila.cells[6].textContent
-          };
-
-          const visible =
-            (!valores.etiqueta || datos.etiqueta.includes(valores.etiqueta)) &&
-            (!valores.modelo || datos.modelo.includes(valores.modelo)) &&
-            (!valores.color || datos.color.includes(valores.color)) &&
-            (!valores.talla || datos.talla.includes(valores.talla)) &&
-            (!valores.sucursal || datos.sucursal === valores.sucursal);
-
-          fila.style.display = visible ? "" : "none";
-        });
-      };
-
-      Object.values(filtros).forEach(f =>
-        f.addEventListener(f.tagName === 'SELECT' ? 'change' : 'input', aplicarFiltros)
-      );
-    });
-  </script>
-
-  <!-- Script: Editar / Guardar cantidad -->
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  document.addEventListener('click', async e => {
-    // Editar
-    if (e.target.classList.contains('editar-btn')) {
-      const id = e.target.dataset.id;
-      const input = document.querySelector(`input[data-id="${id}"]`);
-      const guardarBtn = document.querySelector(`.guardar-btn[data-id="${id}"]`);
-      input.disabled = false;
-      e.target.style.display = 'none';
-      guardarBtn.style.display = 'inline-block';
-      input.focus();
-    }
-
-    // Guardar
-    if (e.target.classList.contains('guardar-btn')) {
-      const id = e.target.dataset.id;
-      const input = document.querySelector(`input[data-id="${id}"]`);
-      const cantidad = input.value;
-
-      fetch('/SANSARA/CONTROLADOR/ActualizarCantidad.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `id=${encodeURIComponent(id)}&cantidad=${encodeURIComponent(cantidad)}`
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          mostrarModal("¡Cantidad actualizada correctamente!");
-          input.disabled = true;
-          e.target.style.display = 'none';
-          const editarBtn = document.querySelector(`.editar-btn[data-id="${id}"]`);
-          editarBtn.style.display = 'inline-block';
-        } else {
-          alert(data.message);
-        }
-      })
-      .catch(err => {
-        console.error("Error en la solicitud:", err);
-        alert("Error al guardar. Verifica la consola.");
-      });
-    }
-
-    // Eliminar
-    if (e.target.classList.contains('eliminar-btn')) {
-      const id = e.target.dataset.id;
-
-      // Mostrar modal de confirmación
-      const confirmado = await mostrarModalConfirmacion("¿Estás seguro que quieres eliminar este producto?");
-      if (!confirmado) return; // Si cancela, no hacer nada
-
-      // Si confirma, enviar petición para eliminar
-      fetch('/SANSARA/CONTROLADOR/EliminarProducto.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `id=${encodeURIComponent(id)}`
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          mostrarModal("Producto eliminado exitosamente");
-          // Remover fila
-          const fila = e.target.closest('tr');
-          if (fila) fila.remove();
-        } else {
-          alert(data.message);
-        }
-      })
-      .catch(err => {
-        console.error("Error al eliminar:", err);
-        alert("Error al eliminar. Verifica la consola.");
-      });
-    }
-  });
+inputs.forEach(id => {
+  const el = document.getElementById(id);
+  if (el.tagName === 'SELECT') {
+    el.addEventListener('change', filtrarProductos);
+  } else {
+    el.addEventListener('input', filtrarProductos);
+  }
 });
 
-// Modal genérico para mensajes de éxito o info
-function mostrarModal(mensaje) {
-  cerrarModal(); // Por si hay otro abierto
-  const modal = document.createElement('div');
-  modal.classList.add('modal-overlay');
-  modal.id = 'mensajeModal';
-  modal.innerHTML = `
-    <div class="glass-card">
-      <span class="modal-close" onclick="cerrarModal()">×</span>
-      <h2 style="text-align:center; color:#FDCA40;">${mensaje}</h2>
-      <button class="modal-button" onclick="cerrarModal()">Aceptar</button>
-    </div>
-  `;
-  document.body.appendChild(modal);
-}
-
-// Modal de confirmación que devuelve una promesa para saber si el usuario aceptó o canceló
-function mostrarModalConfirmacion(mensaje) {
-  return new Promise(resolve => {
-    cerrarModal(); // Cerrar modal anterior si existe
-
-    const modal = document.createElement('div');
-    modal.classList.add('modal-overlay');
-    modal.id = 'mensajeModal';
-    modal.innerHTML = `
-      <div class="glass-card">
-        <h2 style="text-align:center; color:#FDCA40;">${mensaje}</h2>
-        <div style="text-align:center; margin-top: 20px;">
-          <button class="modal-button" id="modalConfirmar">Sí</button>
-          <button class="modal-button" id="modalCancelar">No</button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-
-    // Botones de confirmar y cancelar
-    document.getElementById('modalConfirmar').onclick = () => {
-      cerrarModal();
-      resolve(true);
+  function filtrarProductos() {
+    const data = {
+      etiqueta:  document.getElementById('filtro-etiqueta').value,
+      modelo:    document.getElementById('filtro-modelo').value,
+      color:     document.getElementById('filtro-color').value,
+      talla:     document.getElementById('filtro-talla').value,
+      sucursal:  document.getElementById('filtro-sucursal').value,
     };
-    document.getElementById('modalCancelar').onclick = () => {
-      cerrarModal();
-      resolve(false);
+
+    fetch('FiltrarStock.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(data)
+    })
+    .then(res => res.json())
+    .then(productos => {
+      const tbody = document.querySelector('table tbody');
+      tbody.innerHTML = '';
+
+      if (productos.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color: #999;">Sin resultados</td></tr>`;
+        return;
+      }
+
+      productos.forEach(prod => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${prod.modelo}</td>
+            <td>${prod.categoria_id}</td>
+            <td>${prod.talla}</td>
+            <td>${prod.color}</td>
+            <td>${prod.precio}</td>
+            <td>${prod.marca}</td>
+            <td>${prod.etiqueta}</td>
+            <td>${prod.sucursal}</td>
+            <td>${prod.cantidad}</td>
+          </tr>`;
+      });
+    });
+  }
+</script>
+<script>
+  // Esperar a que el DOM esté cargado
+  document.addEventListener("DOMContentLoaded", () => {
+    const filtroEtiqueta = document.getElementById("filtro-etiqueta");
+    const filtroModelo = document.getElementById("filtro-modelo");
+    const filtroColor = document.getElementById("filtro-color");
+    const filtroTalla = document.getElementById("filtro-talla");
+    const filtroSucursal = document.getElementById("filtro-sucursal");
+    const filas = document.querySelectorAll("tbody tr");
+
+    const aplicarFiltros = () => {
+      const etiqueta = filtroEtiqueta.value.trim().toLowerCase();
+      const modelo = filtroModelo.value.trim().toLowerCase();
+      const color = filtroColor.value.trim().toLowerCase();
+      const talla = filtroTalla.value.trim().toLowerCase();
+      const sucursal = filtroSucursal.value;
+
+      filas.forEach(fila => {
+        const celdaModelo = fila.cells[0].textContent.toLowerCase();
+        const celdaTalla = fila.cells[1].textContent.toLowerCase();
+        const celdaColor = fila.cells[2].textContent.toLowerCase();
+        const celdaEtiqueta = fila.cells[5].textContent.toLowerCase();
+        const celdaSucursal = fila.cells[6].textContent;
+
+        const coincide =
+          (etiqueta === "" || celdaEtiqueta.includes(etiqueta)) &&
+          (modelo === "" || celdaModelo.includes(modelo)) &&
+          (color === "" || celdaColor.includes(color)) &&
+          (talla === "" || celdaTalla.includes(talla)) &&
+          (sucursal === "" || celdaSucursal === sucursal);
+
+        fila.style.display = coincide ? "" : "none";
+      });
     };
+
+    // Agregar eventos a todos los filtros
+    filtroEtiqueta.addEventListener("input", aplicarFiltros);
+    filtroModelo.addEventListener("input", aplicarFiltros);
+    filtroColor.addEventListener("input", aplicarFiltros);
+    filtroTalla.addEventListener("input", aplicarFiltros);
+    filtroSucursal.addEventListener("change", aplicarFiltros);
   });
-}
-
-function cerrarModal() {
-  const modal = document.getElementById("mensajeModal");
-  if (modal) modal.remove();
-}
 </script>
 
-
-
 </body>
-
-
-
 </html>
