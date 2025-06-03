@@ -419,10 +419,10 @@ try {
 </head>
 <body>
   <div class="sidebar">
-     <div class="logo-box">
-        <h2>SANSARA</h2>
-        <span class="rol"><?php echo ucfirst($_SESSION['rol']); ?></span>
-      </div>
+    <div class="logo-box">
+      <h2>SANSARA</h2>
+      <span class="rol"><?php echo ucfirst($_SESSION['rol']); ?></span>
+    </div>
     <br>
 
     <?php if (strtolower($rol) === 'administrador'): ?>
@@ -432,18 +432,17 @@ try {
       <a href="REPORTES_ADMIN.php"><i class="fas fa-chart-line"></i><span>Reportes</span></a>
       <a href="CERRAR_SESION.php"><i class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span></a>
     <?php else: ?>
-    <a href="SUPERVISION_VENTAS.php"><i class="	fas fa-cash-register"></i><span>Supervisión de Ventas</span></a>
-    <a href="CONTROL_INVENTARIO_GERENTE.php"><i class="fas fa-boxes-stacked"></i><span>Control de Inventario</span></a>
-    <a href="REGISTRAR_PRODUCTOS.php"><i class="fas fa-box-open"></i><span>Registrar Productos</span></a> 
-    <a href="REPORTES_GEREN.php"><i class="fas fa-chart-bar"></i><span>Reportes</span></a>
-    <a href="CERRAR_SESION.php"><i class="	fas fa-right-from-bracket"></i><span>Cerrar Sesión</span></a>
+      <a href="SUPERVISION_VENTAS.php"><i class="fas fa-cash-register"></i><span>Supervisión de Ventas</span></a>
+      <a href="CONTROL_INVENTARIO_GERENTE.php"><i class="fas fa-boxes-stacked"></i><span>Control de Inventario</span></a>
+      <a href="REGISTRAR_PRODUCTOS.php"><i class="fas fa-box-open"></i><span>Registrar Productos</span></a> 
+      <a href="REPORTES_GEREN.php"><i class="fas fa-chart-bar"></i><span>Reportes</span></a>
+      <a href="CERRAR_SESION.php"><i class="fas fa-right-from-bracket"></i><span>Cerrar Sesión</span></a>
     <?php endif; ?>
-    
   </div>
 
   <div class="content">
     <div class="welcome">
-     <h2><i class="fas fa-box-open"></i>  REGISTRAR PRODUCTOS</h2>
+      <h2><i class="fas fa-box-open"></i> REGISTRAR PRODUCTOS</h2>
     </div>
 
     <!-- Formulario de Registro de Producto -->
@@ -467,12 +466,19 @@ try {
           <label for="modelo">Modelo:</label>
           <input type="text" id="modelo" name="modelo" placeholder="Modelo del producto" required>
           <label for="talla">Talla:</label>
-          <input type="text" id="talla" name="talla" placeholder="Talla" required>
+          <select id="talla" name="talla" required>
+            <option value="">Seleccionar</option>
+            <option value="XS">XS</option>
+            <option value="S">S</option>
+            <option value="M">M</option>
+            <option value="L">L</option>
+            <option value="XL">XL</option>
+          </select>
         </div>
 
         <div class="fila">
           <label for="color">Color:</label>
-          <input type="text" id="color" name="color" placeholder="Color" required>
+          <select id="color" name="color" required></select>
           <label for="precio">Precio:</label>
           <input type="number" id="precio" name="precio" placeholder="Precio" required step="0.01" min="0">
         </div>
@@ -484,10 +490,11 @@ try {
           <input type="number" id="cantidad" name="cantidad" placeholder="Cantidad" required min="0">
         </div>
 
-        <div class="fila">
-          <label for="etiqueta">Etiqueta:</label>
-          <input type="text" id="etiqueta" name="etiqueta" >
-        </div>
+<div class="fila">
+  <label for="etiqueta">Etiqueta:</label>
+  <input type="text" id="etiqueta" name="etiqueta" readonly style="background-color:rgb(255, 255, 255);">
+</div>
+
 
         <div class="fila">
           <label for="sucursal">Sucursal:</label>
@@ -499,7 +506,7 @@ try {
           </select>
         </div>
 
-        <div class="fila" >
+        <div class="fila">
           <button type="submit" class="formulario">Registrar Producto</button>
         </div>
       </form>
@@ -522,7 +529,7 @@ try {
       </form>
     </div>
 
-    <!-- Contenedor dinámico para la tabla de productos filtrados -->
+    <!-- Tabla de productos -->
     <div class="tabla-container" id="contenedorTabla">
       <?php if (empty($productos)): ?>
         <p class="sin-datos">No hay productos registrados para esta sucursal.</p>
@@ -561,89 +568,75 @@ try {
     </div>
   </div>
 
-  <svg class="wave" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
-      <path fill="#2176FF" fill-opacity="0.2" d="M0,192L60,181.3C120,171,240,149,360,154.7C480,160,600,192,720,192C840,192,960,160,1080,154.7C1200,149,1320,171,1380,181.3L1440,192L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"></path>
-  </svg>
-
   <script>
-  const modelosPorCategoria = {
-    "1": ["Vestido de noche", "Vestido casual", "Blusa", "Pantalón", "Falda", "Conjunto", "Top", "Short"],
-    "2": ["Camisa", "Pantalón", "Playera", "Chamarra", "Short", "Traje", "Sudadera"],
-    "3": ["Pantalón", "Camisa", "Conjunto", "Short", "Playera", "Sudadera"],
-    "4": ["Vestido", "Conjunto", "Falda", "Blusa", "Playera", "Sudadera"],
-    "5": ["Sandalia plana", "Sandalia con tacón", "Sandalia deportiva"],
-    "6": ["Accesorio", "Bisutería", "Pulsera", "Collar", "Anillo", "Aretes"]
-  };
+    const modelosPorCategoria = {
+      "1": ["Vestido de noche", "Vestido casual", "Blusa", "Pantalón", "Falda", "Conjunto", "Top", "Short"],
+      "2": ["Camisa", "Pantalón", "Playera", "Chamarra", "Short", "Traje", "Sudadera"],
+      "3": ["Pantalón", "Camisa", "Conjunto", "Short", "Playera", "Sudadera"],
+      "4": ["Vestido", "Conjunto", "Falda", "Blusa", "Playera", "Sudadera"],
+      "5": ["Sandalia plana", "Sandalia con tacón", "Sandalia deportiva"],
+      "6": ["Accesorio", "Bisutería", "Pulsera", "Collar", "Anillo", "Aretes"]
+    };
 
-  const colores = [
-    "Rojo", "Azul", "Verde", "Negro", "Blanco", "Gris", "Beige", "Rosado",
-    "Amarillo", "Café", "Vino", "Mostaza", "Turquesa", "Fucsia", "Morado", "Coral"
-  ];
+    const colores = ["Rojo", "Azul", "Verde", "Negro", "Blanco", "Gris", "Beige", "Rosado", "Amarillo", "Café", "Vino", "Mostaza", "Turquesa", "Fucsia", "Morado", "Coral"];
 
-  // Elementos
-  const categoriaSelect = document.getElementById("categoria_id");
-  const modeloInput = document.getElementById("modelo");
-  const colorInput = document.getElementById("color");
-  const etiquetaInput = document.getElementById("etiqueta");
+    const categoriaSelect = document.getElementById("categoria_id");
+    const modeloInput = document.getElementById("modelo");
+    const tallaSelect = document.getElementById("talla");
+    const colorSelect = document.getElementById("color");
+    const etiquetaSpan = document.getElementById("etiquetaGenerada");
+    const etiquetaHidden = document.getElementById("etiqueta");
 
-  const nuevoSelectColor = document.createElement("select");
-  nuevoSelectColor.name = "color";
-  nuevoSelectColor.id = "color";
-  colores.forEach(color => {
-    const opt = document.createElement("option");
-    opt.value = color;
-    opt.textContent = color;
-    nuevoSelectColor.appendChild(opt);
-  });
-  colorInput.replaceWith(nuevoSelectColor);
+    // Cargar colores en el select
+    colores.forEach(color => {
+      const opt = document.createElement("option");
+      opt.value = color;
+      opt.textContent = color;
+      colorSelect.appendChild(opt);
+    });
 
-  // Autocompletar modelos
-  categoriaSelect.addEventListener("change", function () {
-    const categoria = this.value;
-    const modelos = modelosPorCategoria[categoria] || [];
-    modeloInput.value = "";
-    modeloInput.setAttribute("list", "modelos-list");
-    let dataList = document.getElementById("modelos-list");
-    if (!dataList) {
-      dataList = document.createElement("datalist");
-      dataList.id = "modelos-list";
-      modeloInput.after(dataList);
-    }
-    dataList.innerHTML = modelos.map(modelo => `<option value="${modelo}">`).join("");
-  });
+    // Cargar modelos según categoría
+    categoriaSelect.addEventListener("change", function () {
+      const modelos = modelosPorCategoria[this.value] || [];
+      modeloInput.value = "";
+      modeloInput.setAttribute("list", "modelos-list");
+      let dataList = document.getElementById("modelos-list");
+      if (!dataList) {
+        dataList = document.createElement("datalist");
+        dataList.id = "modelos-list";
+        modeloInput.after(dataList);
+      }
+      dataList.innerHTML = modelos.map(modelo => `<option value="${modelo}">`).join("");
+    });
 
-  // Generar etiqueta automáticamente
-const actualizarEtiqueta = () => {
-  const fecha = new Date();
-  const marcaTiempo = fecha.getTime().toString().slice(-5); // últimos 5 dígitos del timestamp
-  etiquetaInput.value = marcaTiempo;
-};
+function actualizarEtiqueta() {
+  const timestamp = new Date().getTime().toString().slice(-5);
+  document.getElementById("etiqueta").value = timestamp;
+}
 
+modeloInput.addEventListener("input", actualizarEtiqueta);
+colorSelect.addEventListener("change", actualizarEtiqueta);
+tallaSelect.addEventListener("change", actualizarEtiqueta);
+categoriaSelect.addEventListener("change", actualizarEtiqueta);
 
-  modeloInput.addEventListener("input", actualizarEtiqueta);
-  nuevoSelectColor.addEventListener("change", actualizarEtiqueta);
-  nuevoSelectTalla.addEventListener("change", actualizarEtiqueta);
-  categoriaSelect.addEventListener("change", actualizarEtiqueta);
-</script>
-
-<?php if (isset($_GET['registroP']) && $_GET['registroP'] === 'exito'): ?>
-  <div id="modalRegistroP" class="modal-overlay">
-    <div class="glass-card">
-      <span class="modal-close" onclick="cerrarModalRegistroP()">&times;</span>
-      <h2 style="text-align:center; color:#FDCA40;">¡Producto Registrado!</h2>
-      <p style="text-align:center;">Producto registrado correctamente..</p>
-            <button class="modal-button" onclick="cerrarModalRegistroP()">Cerrar</button>
-    </div>
-  </div>
-  <script>
-    function cerrarModalRegistroP() {
-      const modal = document.getElementById('modalRegistroP');
-      modal.style.display = 'none';
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
   </script>
-<?php endif; ?>
 
-
+  <?php if (isset($_GET['registroP']) && $_GET['registroP'] === 'exito'): ?>
+    <div id="modalRegistroP" class="modal-overlay">
+      <div class="glass-card">
+        <span class="modal-close" onclick="cerrarModalRegistroP()">&times;</span>
+        <h2 style="text-align:center; color:#FDCA40;">¡Producto Registrado!</h2>
+        <p style="text-align:center;">Producto registrado correctamente.</p>
+        <button class="modal-button" onclick="cerrarModalRegistroP()">Cerrar</button>
+      </div>
+    </div>
+    <script>
+      function cerrarModalRegistroP() {
+        document.getElementById('modalRegistroP').style.display = 'none';
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    </script>
+  <?php endif; ?>
 </body>
+
 </html>

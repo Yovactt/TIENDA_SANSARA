@@ -463,6 +463,9 @@
         <label for="precio">Precio:</label>
         <input type="text" id="precio" readonly>
 
+<label for="cantidad_vendida">Cantidad Vendida</label>
+<input type="number" id="cantidad_vendida" disabled style="background:#FFFFFF;">
+
         <label for="cantidad">Cantidad a devolver:</label>
         <input type="number" id="cantidad" min="1">
 
@@ -503,107 +506,125 @@
       d="M0,192L60,181.3C120,171,240,149,360,154.7C480,160,600,192,720,192C840,192,960,160,1080,154.7C1200,149,1320,171,1380,181.3L1440,192L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z">
     </path>
   </svg>
+<script>
+  const urlBase = '/SANSARA/CONTROLADOR/Devoluciones.php';
 
-  <!-- Script -->
-  <script>
-    function registrarDevolucion() {
-      const etiqueta = document.getElementById('etiqueta').value.trim();
-      const producto = document.getElementById('producto').value.trim();
-      const talla = document.getElementById('talla').value.trim();
-      const color = document.getElementById('color').value.trim();
-      const precio = document.getElementById('precio').value.trim();
-      const cantidad = document.getElementById('cantidad').value.trim();
-      const motivo = document.getElementById('motivo').value;
+  // Evento para cuando presionas Enter en el input etiqueta
+  document.getElementById("etiqueta").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const etiqueta = this.value.trim();
 
-if (!etiqueta || !producto || !cantidad) {
-  return;
-}
+      fetch(`${urlBase}?etiqueta=${encodeURIComponent(etiqueta)}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            document.getElementById("producto").value = data.producto.modelo;
+            document.getElementById("talla").value = data.producto.talla;
+            document.getElementById("color").value = data.producto.color;
+            document.getElementById("precio").value = data.producto.precio;
+            document.getElementById("cantidad_vendida").value = data.cantidad_vendida;
 
+            document.getElementById("cantidad").value = '';
+            document.getElementById("cantidad").max = data.cantidad_vendida;
+            document.getElementById("cantidad").placeholder = `Máximo a devolver: ${data.cantidad_vendida}`;
+          } else {
+            mostrarModal("Etiqueta no encontrada en ventas");
+            // Limpiar campos
+            document.getElementById("producto").value = '';
+            document.getElementById("talla").value = '';
+            document.getElementById("color").value = '';
+            document.getElementById("precio").value = '';
+            document.getElementById("cantidad_vendida").value = '';
+            document.getElementById("cantidad").value = '';
+            document.getElementById("cantidad").removeAttribute('max');
+            document.getElementById("cantidad").placeholder = '';
+          }
+        })
+        .catch(() => mostrarModal("Error al conectar con el servidor."));
+    }
+  });
 
-      // Agregar a la tabla
-      const tabla = document.getElementById('tablaDevoluciones');
-      const fila = document.createElement('tr');
-      fila.innerHTML = `
-        <td>${etiqueta}</td>
-        <td>${producto}</td>
-        <td>${talla}</td>
-        <td>${color}</td>
-        <td>${precio}</td>
-        <td>${cantidad}</td>
-        <td>${motivo}</td>
-      `;
-      tabla.appendChild(fila);
+  // Función para registrar la devolución (llamada en el botón)
+  function registrarDevolucion() {
+    const etiqueta = document.getElementById('etiqueta').value.trim();
+    const producto = document.getElementById('producto').value.trim();
+    const talla = document.getElementById('talla').value.trim();
+    const color = document.getElementById('color').value.trim();
+    const precio = document.getElementById('precio').value.trim();
+    const cantidad = document.getElementById('cantidad').value.trim();
+    const motivo = document.getElementById('motivo').value;
 
-      // Enviar al servidor
-      fetch('../CONTROLADOR/Devoluciones.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ etiqueta, motivo, cantidad })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          mostrarModal();
-        } else {
-          alert('Error: ' + data.mensaje);
-        }
-      });
-
-      // Limpiar formulario
-      document.getElementById('etiqueta').value = '';
-      document.getElementById('producto').value = '';
-      document.getElementById('talla').value = '';
-      document.getElementById('color').value = '';
-      document.getElementById('precio').value = '';
-      document.getElementById('cantidad').value = '';
-      document.getElementById('motivo').value = 'defectuoso';
+    const cantidadNum = parseInt(cantidad, 10);
+    if (!etiqueta || !producto || isNaN(cantidadNum) || cantidadNum <= 0) {
+      mostrarModal("Por favor, ingresa cantidad válida y demás campos");
+      return;
     }
 
-    // Buscar datos al presionar ENTER
-    document.getElementById("etiqueta").addEventListener("keypress", function(e) {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        const etiqueta = this.value.trim();
+    fetch(urlBase, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ etiqueta, motivo, cantidad: cantidadNum })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        mostrarModal("¡Devolución exitosa!");
 
-        fetch(`../CONTROLADOR/Devoluciones.php?etiqueta=${encodeURIComponent(etiqueta)}`)
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              document.getElementById("producto").value = data.producto.modelo;
-              document.getElementById("talla").value = data.producto.talla;
-              document.getElementById("color").value = data.producto.color;
-              document.getElementById("precio").value = data.producto.precio;
-            } else {
-              alert(data.mensaje || "Producto no encontrado.");
-            }
-          })
-          .catch(error => {
-            console.error("Error en la petición:", error);
-            alert("Error al conectar con el servidor.");
-          });
+        const tabla = document.getElementById('tablaDevoluciones');
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+          <td>${etiqueta}</td>
+          <td>${producto}</td>
+          <td>${talla}</td>
+          <td>${color}</td>
+          <td>${precio}</td>
+          <td>${cantidadNum}</td>
+          <td>${motivo}</td>
+        `;
+        tabla.appendChild(fila);
+
+        // Limpiar formulario
+        document.getElementById('etiqueta').value = '';
+        document.getElementById('producto').value = '';
+        document.getElementById('talla').value = '';
+        document.getElementById('color').value = '';
+        document.getElementById('precio').value = '';
+        document.getElementById('cantidad').value = '';
+        document.getElementById('motivo').value = 'defectuoso';
+        document.getElementById("cantidad").removeAttribute('max');
+        document.getElementById("cantidad").placeholder = '';
+      } else {
+        mostrarModal("Error: " + (data.mensaje || "Algo salió mal"));
       }
-    });
+    })
+    .catch(() => mostrarModal("Error al conectar con el servidor."));
+  }
 
-    // Modal dinámico
-    function mostrarModal() {
-      const modal = document.createElement('div');
-      modal.classList.add('modal-overlay');
-      modal.id = 'mensajeModal';
-      modal.innerHTML = `
-        <div class="glass-card">
-          <span class="modal-close" onclick="cerrarModal()">×</span>
-          <h2 style="text-align:center; color:#FDCA40;">¡Devolución exitosa!</h2>
-          <button class="modal-button" onclick="cerrarModal()">Aceptar</button>
-        </div>
-      `;
-      document.body.appendChild(modal);
-    }
+  // Funciones para mostrar/cerrar modal
+  function mostrarModal(mensaje) {
+    cerrarModal();
+    const modal = document.createElement('div');
+    modal.classList.add('modal-overlay');
+    modal.id = 'mensajeModal';
+    modal.innerHTML = `
+      <div class="glass-card">
+        <span class="modal-close" onclick="cerrarModal()">×</span>
+        <h2 style="text-align:center; color:#FDCA40;">${mensaje}</h2>
+        <button class="modal-button" onclick="cerrarModal()">Aceptar</button>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
 
-    function cerrarModal() {
-      const modal = document.getElementById("mensajeModal");
-      if (modal) modal.remove();
-    }
-  </script>
+  function cerrarModal() {
+    const modal = document.getElementById("mensajeModal");
+    if (modal) modal.remove();
+  }
+</script>
+
+
+
 
 </body>
 

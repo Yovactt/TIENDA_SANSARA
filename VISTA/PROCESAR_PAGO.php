@@ -425,8 +425,15 @@ if ($id_venta) {
     <button onclick="finalizarPago()">Finalizar Pago</button>
   </div>
 </div>
+<!-- Modal Dinero Insuficiente -->
+<div class="modal-overlay" id="dineroInsuficienteModal" style="display:none;">
+  <div class="glass-card">
+    <span class="modal-close" onclick="cerrarDineroInsuficienteModal()">×</span>
+    <h2 style="text-align:center; color:#FDCA40;">Dinero insuficiente</h2>
+    <button class="modal-button" onclick="cerrarDineroInsuficienteModal()">Aceptar</button>
+  </div>
+</div>
 
-<!-- Script para lógica del formulario -->
 <script>
   let totalVenta = <?= json_encode($totalVenta) ?>;
   document.getElementById("totalPagar").value = totalVenta.toFixed(2);
@@ -439,7 +446,15 @@ if ($id_venta) {
   }
 
   function finalizarPago() {
-    // Redireccionar al controlador con ID
+    const totalPagar = parseFloat(document.getElementById("totalPagar").value) || 0;
+    const dineroRecibido = parseFloat(document.getElementById("dineroRecibido").value) || 0;
+
+    if (dineroRecibido < totalPagar) {
+      // Mostrar modal de Dinero insuficiente con display flex para centrar
+      document.getElementById("dineroInsuficienteModal").style.display = "flex";
+      return;
+    }
+
     if (idVenta) {
       window.location.href = "../CONTROLADOR/ProcesarPago.php?id_venta=" + idVenta;
     } else {
@@ -447,8 +462,13 @@ if ($id_venta) {
     }
   }
 
+  function cerrarDineroInsuficienteModal() {
+    document.getElementById("dineroInsuficienteModal").style.display = "none";
+  }
+
   document.getElementById("grupoEfectivo").style.display = "block";
 </script>
+
 
 <!-- Modal de Confirmación -->
 <?php if (isset($_GET['mensaje']) && $_GET['mensaje'] === 'finalizarPago'): ?>

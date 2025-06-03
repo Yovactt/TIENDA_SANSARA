@@ -389,7 +389,6 @@
     }
 </style>
 </head>
-
 <body>
 
   <!-- Onda decorativa al final de la página -->
@@ -416,18 +415,19 @@
     <!-- Formulario para ingresar productos -->
     <div class="formulario">
       <label for="producto">Código Producto:</label>
-      <input type="text" id="producto" placeholder="Código del producto" onkeypress="if(event.key === 'Enter'){ buscarProducto(); return false; }">
+      <input type="number" id="producto" placeholder="Código del producto" 
+        onkeypress="if(event.key === 'Enter'){ buscarProducto(); return false; }" oninput="habilitarAgregar(false)">
 
       <label for="modelo">Modelo:</label>
       <input type="text" id="modelo" readonly>
 
       <label for="precio">Precio:</label>
-      <input type="number" id="precio" min="0" step="0.01" value="0">
+      <input type="number" id="precio" readonly style="background-color:rgb(255, 255, 255);">
 
       <label for="cantidad">Cantidad:</label>
       <input type="number" id="cantidad" min="1" value="1" oninput="calcularPrecioTotal()">
 
-      <button onclick="agregarProducto()">Agregar</button>
+      <button id="btnAgregar" onclick="agregarProducto()" disabled>Agregar</button>
     </div>
 
     <!-- Tabla con los productos agregados -->
@@ -453,116 +453,184 @@
   </div>
 
 <script>
-  let totalVenta = 0;
+let totalVenta = 0;
+let stockDisponible = 0;
 
-  function agregarProducto() {
-    let codigo = document.getElementById("producto").value.trim();
-    let modelo = document.getElementById("modelo").value.trim();
-    let cantidad = parseInt(document.getElementById("cantidad").value);
-    let precioUnitario = parseFloat(document.getElementById("precio").value);
-    let total = cantidad * precioUnitario;
-    totalVenta += total;
+async function buscarProducto() {
+  const codigoInput = document.getElementById('producto');
+  const codigo = codigoInput.value.trim();
+  const btnAgregar = document.getElementById('btnAgregar');
 
-    let tabla = document.getElementById("tablaVentas");
-    let fila = tabla.insertRow();
-    fila.innerHTML = `
-      <td>${codigo}</td>
-      <td>${modelo}</td>
-      <td>${cantidad}</td>
-      <td>$${precioUnitario.toFixed(2)}</td>
-      <td>$${total.toFixed(2)}</td>
-    `;
-
-    document.getElementById("total").textContent = totalVenta.toFixed(2);
-
-    document.getElementById("producto").value = "";
-    document.getElementById("modelo").value = "";
-    document.getElementById("cantidad").value = "1";
-    document.getElementById("precio").value = "0";
-    document.getElementById("producto").focus();
+  if (!codigo) {
+    limpiarProducto();
+    habilitarAgregar(false);
+    return;
   }
 
-  function eliminarProducto(btn, total) {
-    let fila = btn.parentNode.parentNode;
-    fila.parentNode.removeChild(fila);
-    totalVenta -= total;
-    document.getElementById("total").textContent = totalVenta.toFixed(2);
-  }
+  try {
+    const response = await fetch(`../CONTROLADOR/BuscarProducto.php?codigo=${encodeURIComponent(codigo)}`);
+    const data = await response.json();
 
-  async function buscarProducto() {
-    const codigo = document.getElementById('producto').value.trim();
-    if (!codigo) return;
-
-    try {
-      const response = await fetch(`../CONTROLADOR/BuscarProducto.php?codigo=${encodeURIComponent(codigo)}`);
-      const data = await response.json();
-
-      if (data.error) {
-        document.getElementById('modelo').value = '';
-        document.getElementById('precio').value = 0;
-      } else {
-        document.getElementById('modelo').value = data.modelo;
-        document.getElementById('precio').value = parseFloat(data.precio);
-      }
-    } catch (error) {
-      // Error silenciado
+    if (data.error) {
+      limpiarProducto();
+      mostrarModal("Etiqueta no disponible");
+      habilitarAgregar(false);
+      codigoInput.value = "";
+      codigoInput.focus();
+    } else {
+      document.getElementById('modelo').value = data.modelo;
+      document.getElementById('precio').value = parseFloat(data.precio).toFixed(2);
+      stockDisponible = parseInt(data.stock);
+      habilitarAgregar(true);
     }
+  } catch (error) {
+    // Silenciado
+  }
+}
+
+function habilitarAgregar(estado) {
+  document.getElementById('btnAgregar').disabled = !estado;
+}
+
+function limpiarProducto() {
+  document.getElementById('modelo').value = '';
+  document.getElementById('precio').value = 0;
+  stockDisponible = 0;
+}
+
+function agregarProducto() {
+  let codigo = document.getElementById("producto").value.trim();
+  let modelo = document.getElementById("modelo").value.trim();
+  let cantidad = parseInt(document.getElementById("cantidad").value);
+  let precioUnitario = parseFloat(document.getElementById("precio").value);
+
+  if (isNaN(cantidad) || cantidad < 1) {
+    mostrarModal("Por favor, ingrese una cantidad válida.");
+    return;
   }
 
-  function calcularPrecioTotal() {
-    let cantidad = parseInt(document.getElementById('cantidad').value);
-    let precioUnitario = parseFloat(document.getElementById('precio').value);
-    if (isNaN(cantidad) || cantidad < 1) cantidad = 1;
-    if (isNaN(precioUnitario)) precioUnitario = 0;
-    document.getElementById('precio').value = precioUnitario.toFixed(2);
+  if (cantidad > stockDisponible) {
+    mostrarModal("Cantidad de productos no disponible");
+    return;
   }
 
-  function procesarVenta() {
-    const boton = document.querySelector(".formulario-button");
-    boton.disabled = true;
+  stockDisponible -= cantidad;
 
-    const filas = document.querySelectorAll("#tablaVentas tr");
-    const productos = [];
-    filas.forEach(fila => {
-      const celdas = fila.querySelectorAll("td");
-      const producto = {
-        producto: celdas[0].textContent,
-        modelo: celdas[1].textContent,
-        cantidad: parseInt(celdas[2].textContent),
-        precio_unitario: parseFloat(celdas[3].textContent.replace('$', '')),
-        total: parseFloat(celdas[4].textContent.replace('$', ''))
-      };
-      productos.push(producto);
-    });
+  let total = cantidad * precioUnitario;
+  totalVenta += total;
 
-    const ventaData = {
-      productos: productos,
-      total: totalVenta
+  let tabla = document.getElementById("tablaVentas");
+  let fila = tabla.insertRow();
+  fila.innerHTML = `
+    <td>${codigo}</td>
+    <td>${modelo}</td>
+    <td>${cantidad}</td>
+    <td>$${precioUnitario.toFixed(2)}</td>
+    <td>$${total.toFixed(2)}</td>
+  `;
+
+  document.getElementById("total").textContent = totalVenta.toFixed(2);
+
+  // Limpiar inputs y deshabilitar botón
+  document.getElementById("producto").value = "";
+  limpiarProducto();
+  document.getElementById("cantidad").value = "1";
+  habilitarAgregar(false);
+  document.getElementById("producto").focus();
+}
+
+function eliminarProducto(btn, total) {
+  let fila = btn.parentNode.parentNode;
+  fila.parentNode.removeChild(fila);
+  totalVenta -= total;
+  document.getElementById("total").textContent = totalVenta.toFixed(2);
+}
+
+function calcularPrecioTotal() {
+  let cantidad = parseInt(document.getElementById('cantidad').value);
+  let precioUnitario = parseFloat(document.getElementById('precio').value);
+  if (isNaN(cantidad) || cantidad < 1) cantidad = 1;
+  if (isNaN(precioUnitario)) precioUnitario = 0;
+  document.getElementById('precio').value = precioUnitario.toFixed(2);
+}
+
+function procesarVenta() {
+  const boton = document.querySelector(".formulario-button");
+  boton.disabled = true;
+
+  const filas = document.querySelectorAll("#tablaVentas tr");
+  const productos = [];
+  filas.forEach(fila => {
+    const celdas = fila.querySelectorAll("td");
+    const producto = {
+      producto: celdas[0].textContent,
+      modelo: celdas[1].textContent,
+      cantidad: parseInt(celdas[2].textContent),
+      precio_unitario: parseFloat(celdas[3].textContent.replace('$', '')),
+      total: parseFloat(celdas[4].textContent.replace('$', ''))
     };
+    productos.push(producto);
+  });
 
-    fetch("../CONTROLADOR/GuardarVenta.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(ventaData)
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          window.location.href = "PROCESAR_PAGO.php?id_venta=" + data.id_venta;
-        } else {
-          // Error silenciado
-          boton.disabled = false;
-        }
-      })
-      .catch(() => {
-        // Error silenciado
+  const ventaData = {
+    productos: productos,
+    total: totalVenta
+  };
+
+  fetch("../CONTROLADOR/GuardarVenta.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(ventaData)
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        mostrarModalConRedireccion("Venta finalizada exitosamente", `PROCESAR_PAGO.php?id_venta=${data.id_venta}`);
+      } else {
         boton.disabled = false;
-      });
-  }
+      }
+    })
+    .catch(() => {
+      boton.disabled = false;
+    });
+}
+
+
+// ✅ Función para mostrar mensajes en un modal (reutilizable)
+function mostrarModal(mensaje) {
+  cerrarModal(); // Por si ya hay uno abierto
+  const modal = document.createElement('div');
+  modal.classList.add('modal-overlay');
+  modal.id = 'mensajeModal';
+  modal.innerHTML = `
+    <div class="glass-card">
+      <span class="modal-close" onclick="cerrarModal()">×</span>
+      <h2 style="text-align:center; color:#FDCA40;">${mensaje}</h2>
+      <button class="modal-button" onclick="cerrarModal()">Aceptar</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+function cerrarModal() {
+  const modal = document.getElementById("mensajeModal");
+  if (modal) modal.remove();
+}
+
+function mostrarModalConRedireccion(mensaje, url) {
+  cerrarModal();
+  const modal = document.createElement('div');
+  modal.classList.add('modal-overlay');
+  modal.id = 'mensajeModal';
+  modal.innerHTML = `
+    <div class="glass-card">
+      <span class="modal-close" onclick="cerrarModal()">×</span>
+      <h2 style="text-align:center; color:#FDCA40;">${mensaje}</h2>
+      <button class="modal-button" onclick="window.location.href='${url}'">Aceptar</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
 </script>
-
-
 </body>
-
-
 </html>

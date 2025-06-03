@@ -1,91 +1,118 @@
 <?php
 require_once '../MODELO/Conexion.php';
 $conn = conectar();
-
-// Establecer zona horaria correcta para PHP
-date_default_timezone_set('America/Mexico_City');
-
 header('Content-Type: application/json; charset=utf-8');
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $data = json_decode(file_get_contents("php://input"), true);
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['etiqueta'])) {
+    $etiqueta = trim($_GET['etiqueta']);
 
-    if (isset($data['etiqueta'], $data['motivo'], $data['cantidad'])) {
-        $etiqueta = $data['etiqueta'];
-        $motivo = $data['motivo'];
-        $cantidad = $data['cantidad'];
+    try {
+        // Buscar cantidad vendida
+        $stmtVenta = $conn->prepare("SELECT COALESCE(SUM(cantidad), 0) AS cantidad_vendida FROM detalles_venta WHERE producto = ?");
+        $stmtVenta->execute([$etiqueta]);
+        $venta = $stmtVenta->fetch(PDO::FETCH_ASSOC);
 
-        try {
-            // Buscar producto
-            $stmt = $conn->prepare("SELECT modelo, talla, color, precio FROM productos WHERE etiqueta = ?");
-            $stmt->execute([$etiqueta]);
-            $producto = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($producto) {
-                // Obtener fecha actual desde PHP
-                $fecha_actual = date('Y-m-d H:i:s');
-
-                // Insertar devolución con fecha generada por PHP
-                $stmtInsert = $conn->prepare("
-                    INSERT INTO devoluciones (etiqueta, producto, talla, color, precio, cantidad, motivo, fecha)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                ");
-                $resultado = $stmtInsert->execute([
-                    $etiqueta,
-                    $producto['modelo'],
-                    $producto['talla'],
-                    $producto['color'],
-                    $producto['precio'],
-                    $cantidad,
-                    $motivo,
-                    $fecha_actual
-                ]);
-
-                if ($resultado) {
-                    echo json_encode([
-                        "success" => true,
-                        "mensaje" => "Devolución registrada exitosamente"
-                    ]);
-                } else {
-                    echo json_encode([
-                        "success" => false,
-                        "mensaje" => "Error al registrar la devolución en la base de datos"
-                    ]);
-                }
-            } else {
-                echo json_encode([
-                    "success" => false,
-                    "mensaje" => "Producto no encontrado"
-                ]);
-            }
-        } catch (Exception $e) {
+        if (!$venta || $venta['cantidad_vendida'] == 0) {
             echo json_encode([
                 "success" => false,
-                "mensaje" => "Error del servidor: " . $e->getMessage()
+                "mensaje" => "Etiqueta no encontrada en ventas"
             ]);
+            exit;
         }
-    } else {
+
+        // Obtener detalles del producto
+        $stmtProducto = $conn->prepare("SELECT modelo, talla, color, precio FROM productos WHERE etiqueta = ?");
+        $stmtProducto->execute([$etiqueta]);
+        $producto = $stmtProducto->fetch(PDO::FETCH_ASSOC);
+
+        if (!$producto) {
+            echo json_encode([
+                "success" => false,
+                "mensaje" => "Producto no encontrado en productos"
+            ]);
+            exit;
+        }
+
+        echo json_encode([
+            "success" => true,
+            "producto" => $producto,
+            "cantidad_vendida" => (int)$venta['cantidad_vendida']
+        ]);
+    } catch (Exception $e) {
+        echo json_encode([
+            "success" => false,
+            "mensaje" => "Error del servidor: " . $e->getMessage()
+        ]);
+    }
+
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $input = json_decode(file_get_contents('php://input'), true);
+
+    $etiqueta = trim($input['etiqueta'] ?? '');
+    $motivo = trim($input['motivo'] ?? '');
+    $cantidad = (int)($input['cantidad'] ?? 0);
+
+    if (!$etiqueta || !$cantidad || !$motivo) {
         echo json_encode([
             "success" => false,
             "mensaje" => "Datos incompletos"
         ]);
+        exit;
     }
-    exit;
-}
 
-// Consulta GET para buscar producto por etiqueta
-if (isset($_GET['etiqueta'])) {
-    $etiqueta = $_GET['etiqueta'];
+    try {
+        // Obtener detalles del producto para insertar la devolución
+        $stmtProducto = $conn->prepare("SELECT modelo, talla, color, precio FROM productos WHERE etiqueta = ?");
+        $stmtProducto->execute([$etiqueta]);
+        $producto = $stmtProducto->fetch(PDO::FETCH_ASSOC);
 
-    $stmt = $conn->prepare("SELECT modelo, talla, color, precio FROM productos WHERE etiqueta = ?");
-    $stmt->execute([$etiqueta]);
-    $producto = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$producto) {
+            echo json_encode([
+                "success" => false,
+                "mensaje" => "Producto no encontrado"
+            ]);
+            exit;
+        }
 
-    if ($producto) {
-        echo json_encode(["success" => true, "producto" => $producto]);
-    } else {
-        echo json_encode(["success" => false, "mensaje" => "Producto no encontrado"]);
+        // Obtener la cantidad actual disponible en detalles_venta (ya descontadas devoluciones anteriores)
+        $stmtVenta = $conn->prepare("SELECT cantidad FROM detalles_venta WHERE producto = ?");
+        $stmtVenta->execute([$etiqueta]);
+        $venta = $stmtVenta->fetch(PDO::FETCH_ASSOC);
+
+        $cantidad_disponible = $venta ? (int)$venta['cantidad'] : 0;
+
+        if ($cantidad > $cantidad_disponible) {
+            echo json_encode([
+                "success" => false,
+                "mensaje" => "Cantidad a devolver excede la cantidad disponible. Disponible: $cantidad_disponible"
+            ]);
+            exit;
+        }
+
+        // Insertar la devolución
+        $stmtInsert = $conn->prepare("INSERT INTO devoluciones (etiqueta, producto, talla, color, precio, cantidad, motivo) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmtInsert->execute([
+            $etiqueta,
+            $producto['modelo'],
+            $producto['talla'],
+            $producto['color'],
+            $producto['precio'],
+            $cantidad,
+            $motivo
+        ]);
+
+        // Actualizar la cantidad en detalles_venta restando la cantidad devuelta
+        $stmtUpdate = $conn->prepare("UPDATE detalles_venta SET cantidad = cantidad - ? WHERE producto = ?");
+        $stmtUpdate->execute([$cantidad, $etiqueta]);
+
+        echo json_encode([
+            "success" => true,
+            "mensaje" => "Devolución registrada correctamente"
+        ]);
+    } catch (Exception $e) {
+        echo json_encode([
+            "success" => false,
+            "mensaje" => "Error del servidor: " . $e->getMessage()
+        ]);
     }
-} else {
-    echo json_encode(["success" => false, "mensaje" => "Etiqueta no proporcionada"]);
 }
