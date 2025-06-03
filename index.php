@@ -316,7 +316,6 @@ a:hover {
     <form action="CONTROLADOR/Login.php" method="POST">
       <input type="email" name="correo" placeholder="Correo" required>
       <input type="password" name="contrasena" placeholder="Contraseña" required>
-      <a href="#" onclick="abrirModal()">¿Olvidaste tu contraseña?</a>
       <button type="submit">Entrar</button>
     </form>
   <?php endif; ?>
@@ -473,21 +472,6 @@ a:hover {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   </script>
-<?php endif; ?>
-
-<?php if (isset($_GET['recuperacion'])): ?>
-  <div class="modal-overlay">
-    <div class="glass-card">
-      <span class="modal-close" onclick="this.parentElement.parentElement.remove()">×</span>
-      <?php if ($_GET['recuperacion'] === 'ok'): ?>
-        <h2 style="text-align:center; color:#FDCA40;">¡Correo encontrado!</h2>
-        <p style="text-align:center;">Hemos enviado un enlace para restablecer tu contraseña (simulado).</p>
-      <?php else: ?>
-        <h2 style="text-align:center; color:#ff6b6b;">Correo no encontrado</h2>
-        <p style="text-align:center;">El correo que ingresaste no está registrado en el sistema.</p>
-      <?php endif; ?>
-    </div>
-  </div>
 <?php endif; ?>
 
 

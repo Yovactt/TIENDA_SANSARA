@@ -726,11 +726,5 @@ function cerrarModal() {
   if (modal) modal.remove();
 }
 </script>
-
-
-
 </body>
-
-
-
 </html>
