@@ -193,7 +193,6 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'gerente') {
       z-index: -1;
     }
 
-   
 .logo-box {
   text-align: center;
   margin-bottom: 25px;
@@ -220,6 +219,7 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'gerente') {
 .sidebar:hover .logo-box .rol {
   opacity: 1;
 }
+   
 
   </style>
 </head>
