@@ -474,6 +474,24 @@ a:hover {
   </script>
 <?php endif; ?>
 
+<?php if (isset($_GET['error']) && $_GET['error'] === 'login'): ?>
+  <div id="modalLoginError" class="modal-overlay">
+    <div class="glass-card">
+      <span class="modal-close" onclick="cerrarModalLoginError()">&times;</span>
+      <h2 style="text-align:center;  color:#FDCA40;">Correo o contraseña incorrectos</h2>
+      <p style="text-align:center;">Vuelve a intentarlo.</p>
+      <button class="modal-button" onclick="cerrarModalLoginError()">Aceptar</button>
+    </div>
+  </div>
+  <script>
+    function cerrarModalLoginError() {
+      const modal = document.getElementById('modalLoginError');
+      modal.style.display = 'none';
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  </script>
+<?php endif; ?>
+
 
 </body>
 </html>
