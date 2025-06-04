@@ -5,7 +5,7 @@ date_default_timezone_set('America/Mexico_City');
 require_once '../MODELO/Conexion.php';
 
 if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], ['administrador', 'gerente'])) {
-    header("Location: ../VISTA/REGISTRAR_PRODUCTOS.php?mensaje=" . urlencode("❌ No tienes permisos para registrar productos.") . "&tipo=error");
+    header("Location: ../REGISTRAR_PRODUCTOS.php?mensaje=" . urlencode("❌ No tienes permisos para registrar productos.") . "&tipo=error");
     exit;
 }
 
@@ -20,18 +20,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sucursal = trim($_POST["sucursal"] ?? '');
     $cantidad = trim($_POST["cantidad"] ?? '');
 
-    // Ya no hay restricción para sucursal para gerente
-
+    // Etiqueta automática si no se proporciona
     if (empty($etiqueta)) {
-        $nombreCategoria = [
-            1 => 'Dama', 2 => 'Caballero', 3 => 'Niño', 4 => 'Niña', 5 => 'Sandalia', 6 => 'Chachara'
-        ][$categoria_id] ?? 'General';
-
         $etiqueta = substr(time(), -5);
     }
 
-    if (empty($modelo) || empty($categoria_id) || empty($talla) || empty($color) || empty($precio)) {
-        header("Location: ../VISTA/REGISTRAR_PRODUCTOS.php?mensaje=" . urlencode("❗Completa todos los campos obligatorios.") . "&tipo=error");
+    // Validación de campos requeridos
+    if (empty($modelo) || empty($categoria_id) || empty($precio)) {
+        header("Location: ../REGISTRAR_PRODUCTOS.php?mensaje=" . urlencode("❗Completa todos los campos obligatorios.") . "&tipo=error");
+        exit;
+    }
+
+    // Solo exigir talla y color si la categoría NO es Cháchara (ID 6)
+    if ($categoria_id !== 6 && (empty($talla) || empty($color))) {
+        header("Location: ../REGISTRAR_PRODUCTOS.php?mensaje=" . urlencode("❗Talla y color son obligatorios para esta categoría.") . "&tipo=error");
         exit;
     }
 
@@ -46,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $existe = $verificar->fetchColumn();
 
         if ($existe > 0) {
-            header("Location: ../VISTA/REGISTRAR_PRODUCTOS.php?mensaje=" . urlencode("⚠️ El producto ya existe con ese modelo, talla y sucursal.") . "&tipo=error");
+            header("Location: ../REGISTRAR_PRODUCTOS.php?mensaje=" . urlencode("⚠️ El producto ya existe con ese modelo, talla y sucursal.") . "&tipo=error");
             exit;
         } else {
             $stmt = $conn->prepare("INSERT INTO productos
@@ -64,15 +66,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->bindParam(':cantidad', $cantidad);
 
             if ($stmt->execute()) {
-                header("Location: ../VISTA/REGISTRAR_PRODUCTOS.php?registroP=exito");
+                header("Location: ../REGISTRAR_PRODUCTOS.php?registroP=exito");
                 exit;
             } else {
-                header("Location: ../VISTA/REGISTRAR_PRODUCTOS.php?mensaje=" . urlencode("❌ Error al registrar el producto.") . "&tipo=error");
+                header("Location: ../REGISTRAR_PRODUCTOS.php?mensaje=" . urlencode("❌ Error al registrar el producto.") . "&tipo=error");
                 exit;
             }
         }
     } catch (PDOException $e) {
-        header("Location: ../VISTA/REGISTRAR_PRODUCTOS.php?mensaje=" . urlencode("❌ Error de PDO: " . $e->getMessage()) . "&tipo=error");
+        header("Location: ../REGISTRAR_PRODUCTOS.php?mensaje=" . urlencode("❌ Error de PDO: " . $e->getMessage()) . "&tipo=error");
         exit;
     }
 }
