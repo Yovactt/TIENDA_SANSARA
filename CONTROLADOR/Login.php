@@ -41,13 +41,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         } else {
             // Redirige con parámetro para mostrar modal en index.php
-            header("Location: /SANSARA/index.php?error=login");
+            header("Location: index.php?error=login");
             exit;
         }
     } catch (PDOException $e) {
         echo "Error en la base de datos: " . $e->getMessage();
     }
 } else {
-    header("Location: /SANSARA/index.php");
+    header("Location: index.php");
     exit;
 }
