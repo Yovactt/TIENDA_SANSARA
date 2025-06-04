@@ -637,6 +637,24 @@ categoriaSelect.addEventListener("change", actualizarEtiqueta);
       }
     </script>
   <?php endif; ?>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const soloLetrasMayus = function(input) {
+      input.value = input.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '');
+    };
+
+    const marcaInput = document.getElementById('marca');
+    const modeloInput = document.getElementById('modelo');
+
+    marcaInput.addEventListener('input', function() {
+      soloLetrasMayus(this);
+    });
+
+    modeloInput.addEventListener('input', function() {
+      soloLetrasMayus(this);
+    });
+  });
+</script>
 </body>
 
 </html>
