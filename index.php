@@ -297,7 +297,7 @@ a:hover {
 
     <div id="formularioRegistro" class="oculto">
       <h1>Registrar Administrador</h1>
-      <form action="CONTROLADOR/RegistrarAdmin.php" method="POST" >
+      <form action="SANSARA/CONTROLADOR/RegistrarAdmin.php" method="POST" >
         <input type="text" name="nombre" placeholder="Nombre" required oninput="validarNombre(this)">
         <input type="email" name="correo" placeholder="Correo" required oninput="validarCorreo(this)">
         <div id="mensajeCorreo"></div>
@@ -313,7 +313,7 @@ a:hover {
 
   <?php else: ?>
     <h1>Iniciar Sesión</h1>
-    <form action="CONTROLADOR/Login.php" method="POST">
+    <form action="/SANSARA/CONTROLADOR/Login.php" method="POST">
       <input type="email" name="correo" placeholder="Correo" required>
       <input type="password" name="contrasena" placeholder="Contraseña" required>
       <button type="submit">Entrar</button>
