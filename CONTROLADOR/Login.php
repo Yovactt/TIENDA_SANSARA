@@ -17,7 +17,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
         $usuario_data = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Usar password_verify para comprobar la contraseña
         if ($usuario_data && password_verify($contrasena, $usuario_data['contrasena'])) {
             $_SESSION['nombre'] = $usuario_data['nombre'];
             $_SESSION['rol'] = $usuario_data['rol'];
@@ -41,13 +40,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             exit;
         } else {
-            echo "<script>alert('Correo o contraseña incorrectos'); window.location.href = '../SANSARA/index.php';</script>";
+            // Redirige con parámetro para mostrar modal en index.php
+            header("Location: /SANSARA/index.php?error=login");
+            exit;
         }
     } catch (PDOException $e) {
         echo "Error en la base de datos: " . $e->getMessage();
     }
 } else {
-    header("Location: ../SANSARA/index.php");
+    header("Location: /SANSARA/index.php");
     exit;
 }
-?>
