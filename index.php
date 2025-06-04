@@ -297,7 +297,7 @@ a:hover {
 
     <div id="formularioRegistro" class="oculto">
       <h1>Registrar Administrador</h1>
-      <form action="SANSARA/CONTROLADOR/RegistrarAdmin.php" method="POST" >
+      <form action="CONTROLADOR/RegistrarAdmin.php" method="POST" >
         <input type="text" name="nombre" placeholder="Nombre" required oninput="validarNombre(this)">
         <input type="email" name="correo" placeholder="Correo" required oninput="validarCorreo(this)">
         <div id="mensajeCorreo"></div>
@@ -313,7 +313,7 @@ a:hover {
 
   <?php else: ?>
     <h1>Iniciar Sesión</h1>
-    <form action="/SANSARA/CONTROLADOR/Login.php" method="POST">
+    <form action="CONTROLADOR/Login.php" method="POST">
       <input type="email" name="correo" placeholder="Correo" required>
       <input type="password" name="contrasena" placeholder="Contraseña" required>
       <button type="submit">Entrar</button>
@@ -473,26 +473,6 @@ a:hover {
     }
   </script>
 <?php endif; ?>
-
-
-<?php if (isset($_GET['error']) && $_GET['error'] === 'login'): ?>
-  <div id="modalLoginError" class="modal-overlay">
-    <div class="glass-card">
-      <span class="modal-close" onclick="cerrarModalLoginError()">&times;</span>
-      <h2 style="text-align:center;  color:#FDCA40;">Correo o contraseña incorrectos</h2>
-      <p style="text-align:center;">Vuelve a intentarlo.</p>
-      <button class="modal-button" onclick="cerrarModalLoginError()">Aceptar</button>
-    </div>
-  </div>
-  <script>
-    function cerrarModalLoginError() {
-      const modal = document.getElementById('modalLoginError');
-      modal.style.display = 'none';
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  </script>
-<?php endif; ?>
-
 
 
 </body>
