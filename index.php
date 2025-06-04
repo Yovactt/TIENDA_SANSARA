@@ -474,6 +474,7 @@ a:hover {
   </script>
 <?php endif; ?>
 
+
 <?php if (isset($_GET['error']) && $_GET['error'] === 'login'): ?>
   <div id="modalLoginError" class="modal-overlay">
     <div class="glass-card">
@@ -491,6 +492,7 @@ a:hover {
     }
   </script>
 <?php endif; ?>
+
 
 
 </body>
