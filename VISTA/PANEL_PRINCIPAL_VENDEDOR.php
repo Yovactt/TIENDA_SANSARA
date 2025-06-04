@@ -149,12 +149,42 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'vendedor') {
       margin-bottom: 20px;
       color: #31393C;
     }
+   .logo-box {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.logo-box h2 {
+  color: #fff;
+  font-size: 20px;
+  margin-bottom: 0px; /* SIN separación */
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.logo-box .rol {
+  display: block;
+  color: #fff;
+  font-size: 12px;
+  margin-top: 0px;  /* SIN separación */
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar:hover .logo-box h2,
+.sidebar:hover .logo-box .rol {
+  opacity: 1;
+}
+   
   </style>
 </head>
 <body>
 
   <div class="sidebar">
-    <h2>SANSARA</h2><br>
+  <div class="logo-box">
+    <h2>SANSARA</h2>
+    <span class="rol"><?php echo ucfirst($_SESSION['rol']); ?></span>
+  </div>
     <a href="CONSULTAR_INVENTARIO_VENDEDOR.php"><i class="fas fa-search"></i><span>Consultar producto</span></a>
     <a href="CERRAR_SESION.php"><i class="fas fa-sign-out-alt"></i><span>Cerrar sesión</span></a>
   </div>
