@@ -568,7 +568,7 @@ try {
     </div>
   </div>
 
-  <script>
+   <script>
     const modelosPorCategoria = {
       "1": ["Vestido de noche", "Vestido casual", "Blusa", "Pantalón", "Falda", "Conjunto", "Top", "Short"],
       "2": ["Camisa", "Pantalón", "Playera", "Chamarra", "Short", "Traje", "Sudadera"],
@@ -595,7 +595,6 @@ try {
       colorSelect.appendChild(opt);
     });
 
-
  // Cargar modelos y controlar talla según categoría
 categoriaSelect.addEventListener("change", function () {
   const modelos = modelosPorCategoria[this.value] || [];
@@ -609,7 +608,7 @@ categoriaSelect.addEventListener("change", function () {
   }
   dataList.innerHTML = modelos.map(modelo => `<option value="${modelo}">`).join("");
 
-  // Deshabilitar "Talla" si es Chacharas
+  // ✅ Deshabilitar "Talla" si es Chacharas
   if (this.value === "6") {
     tallaSelect.disabled = true;
     tallaSelect.value = "";
@@ -617,7 +616,7 @@ categoriaSelect.addEventListener("change", function () {
   } else {
     tallaSelect.disabled = false;
 
-    // Cargar tallas numéricas para Sandalias (20 a 27)
+    // ✅ Cargar tallas numéricas para Sandalias (20 a 27)
     if (this.value === "5") {
       tallaSelect.innerHTML = '<option value="">Seleccionar</option>';
       for (let i = 20; i <= 27; i++) {
@@ -642,16 +641,16 @@ categoriaSelect.addEventListener("change", function () {
   actualizarEtiqueta(); // Mantiene etiqueta actualizada
 });
 
-function actualizarEtiqueta() {
-  const timestamp = new Date().getTime().toString().slice(-5);
-  document.getElementById("etiqueta").value = timestamp;
-}
 
-modeloInput.addEventListener("input", actualizarEtiqueta);
-colorSelect.addEventListener("change", actualizarEtiqueta);
-tallaSelect.addEventListener("change", actualizarEtiqueta);
-categoriaSelect.addEventListener("change", actualizarEtiqueta);
+    function actualizarEtiqueta() {
+      const timestamp = new Date().getTime().toString().slice(-5);
+      document.getElementById("etiqueta").value = timestamp;
+    }
 
+    modeloInput.addEventListener("input", actualizarEtiqueta);
+    colorSelect.addEventListener("change", actualizarEtiqueta);
+    tallaSelect.addEventListener("change", actualizarEtiqueta);
+    categoriaSelect.addEventListener("change", actualizarEtiqueta);
   </script>
 
   <?php if (isset($_GET['registroP']) && $_GET['registroP'] === 'exito'): ?>
@@ -670,24 +669,24 @@ categoriaSelect.addEventListener("change", actualizarEtiqueta);
       }
     </script>
   <?php endif; ?>
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const soloLetrasMayus = function(input) {
-      input.value = input.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '');
-    };
 
-    const marcaInput = document.getElementById('marca');
-    const modeloInput = document.getElementById('modelo');
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const soloLetrasMayus = function (input) {
+        input.value = input.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '');
+      };
 
-    marcaInput.addEventListener('input', function() {
-      soloLetrasMayus(this);
+      const marcaInput = document.getElementById('marca');
+      const modeloInput = document.getElementById('modelo');
+
+      marcaInput.addEventListener('input', function () {
+        soloLetrasMayus(this);
+      });
+
+      modeloInput.addEventListener('input', function () {
+        soloLetrasMayus(this);
+      });
     });
-
-    modeloInput.addEventListener('input', function() {
-      soloLetrasMayus(this);
-    });
-  });
-</script>
+  </script>
 </body>
-
 </html>
