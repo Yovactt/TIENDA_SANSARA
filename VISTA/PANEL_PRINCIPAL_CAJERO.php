@@ -143,6 +143,8 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'cajero') {
       }
     }
 
+    /* Es una onda SVG al fondo, con opacidad baja (fill-opacity="0.2").
+    Solo decorativa, da un toque moderno. */
     .wave {
       position: fixed;
       bottom: 0;
@@ -150,6 +152,7 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'cajero') {
       width: 100%;
       z-index: -1;
     }
+
 
     h2 {
       margin-bottom: 20px;
