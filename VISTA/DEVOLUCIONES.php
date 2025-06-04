@@ -507,7 +507,7 @@
     </path>
   </svg>
 <script>
-  const urlBase = '/SANSARA/CONTROLADOR/Devoluciones.php';
+  const urlBase = '../CONTROLADOR/Devoluciones.php'; 
 
   // Evento para cuando presionas Enter en el input etiqueta
   document.getElementById("etiqueta").addEventListener("keypress", function(e) {
@@ -515,8 +515,16 @@
       e.preventDefault();
       const etiqueta = this.value.trim();
 
+      if (!etiqueta) {
+        mostrarModal("Por favor, ingresa una etiqueta válida.");
+        return;
+      }
+
       fetch(`${urlBase}?etiqueta=${encodeURIComponent(etiqueta)}`)
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) throw new Error("Error de servidor");
+          return response.json();
+        })
         .then(data => {
           if (data.success) {
             document.getElementById("producto").value = data.producto.modelo;
@@ -530,22 +538,13 @@
             document.getElementById("cantidad").placeholder = `Máximo a devolver: ${data.cantidad_vendida}`;
           } else {
             mostrarModal("Etiqueta no encontrada en ventas");
-            // Limpiar campos
-            document.getElementById("producto").value = '';
-            document.getElementById("talla").value = '';
-            document.getElementById("color").value = '';
-            document.getElementById("precio").value = '';
-            document.getElementById("cantidad_vendida").value = '';
-            document.getElementById("cantidad").value = '';
-            document.getElementById("cantidad").removeAttribute('max');
-            document.getElementById("cantidad").placeholder = '';
+            limpiarCampos();
           }
         })
         .catch(() => mostrarModal("Error al conectar con el servidor."));
     }
   });
 
-  // Función para registrar la devolución (llamada en el botón)
   function registrarDevolucion() {
     const etiqueta = document.getElementById('etiqueta').value.trim();
     const producto = document.getElementById('producto').value.trim();
@@ -557,7 +556,7 @@
 
     const cantidadNum = parseInt(cantidad, 10);
     if (!etiqueta || !producto || isNaN(cantidadNum) || cantidadNum <= 0) {
-      mostrarModal("Por favor, ingresa cantidad válida y demás campos");
+      mostrarModal("Por favor, completa todos los campos correctamente.");
       return;
     }
 
@@ -566,7 +565,10 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ etiqueta, motivo, cantidad: cantidadNum })
     })
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) throw new Error("Error de servidor");
+      return response.json();
+    })
     .then(data => {
       if (data.success) {
         mostrarModal("¡Devolución exitosa!");
@@ -584,24 +586,16 @@
         `;
         tabla.appendChild(fila);
 
-        // Limpiar formulario
-        document.getElementById('etiqueta').value = '';
-        document.getElementById('producto').value = '';
-        document.getElementById('talla').value = '';
-        document.getElementById('color').value = '';
-        document.getElementById('precio').value = '';
-        document.getElementById('cantidad').value = '';
-        document.getElementById('motivo').value = 'defectuoso';
-        document.getElementById("cantidad").removeAttribute('max');
-        document.getElementById("cantidad").placeholder = '';
+        limpiarCampos();
       } else {
-        mostrarModal("Error: " + (data.mensaje || "Algo salió mal"));
+        // Mostrar mensaje personalizado si excede la cantidad vendida u otro error
+        const mensaje = data.mensaje || "Error desconocido al registrar la devolución.";
+        mostrarModal(mensaje);
       }
     })
     .catch(() => mostrarModal("Error al conectar con el servidor."));
   }
 
-  // Funciones para mostrar/cerrar modal
   function mostrarModal(mensaje) {
     cerrarModal();
     const modal = document.createElement('div');
@@ -621,11 +615,19 @@
     const modal = document.getElementById("mensajeModal");
     if (modal) modal.remove();
   }
+
+  function limpiarCampos() {
+    document.getElementById('producto').value = '';
+    document.getElementById('talla').value = '';
+    document.getElementById('color').value = '';
+    document.getElementById('precio').value = '';
+    document.getElementById('cantidad').value = '';
+    document.getElementById('cantidad').removeAttribute('max');
+    document.getElementById('cantidad').placeholder = '';
+    document.getElementById('cantidad_vendida').value = '';
+    document.getElementById('motivo').value = 'defectuoso';
+  }
 </script>
-
-
-
-
 </body>
 
 </html>
