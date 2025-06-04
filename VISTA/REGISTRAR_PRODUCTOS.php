@@ -568,90 +568,92 @@ try {
     </div>
   </div>
 
-   <script>
-    const modelosPorCategoria = {
-      "1": ["Vestido de noche", "Vestido casual", "Blusa", "Pantalón", "Falda", "Conjunto", "Top", "Short"],
-      "2": ["Camisa", "Pantalón", "Playera", "Chamarra", "Short", "Traje", "Sudadera"],
-      "3": ["Pantalón", "Camisa", "Conjunto", "Short", "Playera", "Sudadera"],
-      "4": ["Vestido", "Conjunto", "Falda", "Blusa", "Playera", "Sudadera"],
-      "5": ["Sandalia plana", "Sandalia con tacón", "Sandalia deportiva"],
-      "6": ["Accesorio", "Bisutería", "Pulsera", "Collar", "Anillo", "Aretes"]
-    };
+<script>
+  const modelosPorCategoria = {
+    "1": ["Vestido de noche", "Vestido casual", "Blusa", "Pantalón", "Falda", "Conjunto", "Top", "Short"],
+    "2": ["Camisa", "Pantalón", "Playera", "Chamarra", "Short", "Traje", "Sudadera"],
+    "3": ["Pantalón", "Camisa", "Conjunto", "Short", "Playera", "Sudadera"],
+    "4": ["Vestido", "Conjunto", "Falda", "Blusa", "Playera", "Sudadera"],
+    "5": ["Sandalia plana", "Sandalia con tacón", "Sandalia deportiva"],
+    "6": ["Accesorio", "Bisutería", "Pulsera", "Collar", "Anillo", "Aretes"]
+  };
 
-    const colores = ["Rojo", "Azul", "Verde", "Negro", "Blanco", "Gris", "Beige", "Rosado", "Amarillo", "Café", "Vino", "Mostaza", "Turquesa", "Fucsia", "Morado", "Coral"];
+  const colores = ["Rojo", "Azul", "Verde", "Negro", "Blanco", "Gris", "Beige", "Rosado", "Amarillo", "Café", "Vino", "Mostaza", "Turquesa", "Fucsia", "Morado", "Coral"];
 
-    const categoriaSelect = document.getElementById("categoria_id");
-    const modeloInput = document.getElementById("modelo");
-    const tallaSelect = document.getElementById("talla");
-    const colorSelect = document.getElementById("color");
-    const etiquetaSpan = document.getElementById("etiquetaGenerada");
-    const etiquetaHidden = document.getElementById("etiqueta");
+  const categoriaSelect = document.getElementById("categoria_id");
+  const modeloInput = document.getElementById("modelo");
+  const tallaSelect = document.getElementById("talla");
+  const colorSelect = document.getElementById("color");
+  const etiquetaHidden = document.getElementById("etiqueta");
 
-    // Cargar colores en el select
-    colores.forEach(color => {
-      const opt = document.createElement("option");
-      opt.value = color;
-      opt.textContent = color;
-      colorSelect.appendChild(opt);
-    });
+  // Cargar colores
+  colores.forEach(color => {
+    const opt = document.createElement("option");
+    opt.value = color;
+    opt.textContent = color;
+    colorSelect.appendChild(opt);
+  });
 
- // Cargar modelos y controlar talla según categoría
-categoriaSelect.addEventListener("change", function () {
-  const modelos = modelosPorCategoria[this.value] || [];
-  modeloInput.value = "";
-  modeloInput.setAttribute("list", "modelos-list");
-  let dataList = document.getElementById("modelos-list");
-  if (!dataList) {
-    dataList = document.createElement("datalist");
-    dataList.id = "modelos-list";
-    modeloInput.after(dataList);
-  }
-  dataList.innerHTML = modelos.map(modelo => `<option value="${modelo}">`).join("");
+  categoriaSelect.addEventListener("change", function () {
+    const categoria = this.value;
+    const modelos = modelosPorCategoria[categoria] || [];
 
-  // ✅ Deshabilitar "Talla" si es Chacharas
-  if (this.value === "6") {
-    tallaSelect.disabled = true;
-    tallaSelect.value = "";
-    tallaSelect.innerHTML = '<option value="">Seleccionar</option>';
-  } else {
-    tallaSelect.disabled = false;
+    modeloInput.value = "";
+    modeloInput.setAttribute("list", "modelos-list");
+    let dataList = document.getElementById("modelos-list");
+    if (!dataList) {
+      dataList = document.createElement("datalist");
+      dataList.id = "modelos-list";
+      modeloInput.after(dataList);
+    }
+    dataList.innerHTML = modelos.map(modelo => `<option value="${modelo}">`).join("");
 
-    // ✅ Cargar tallas numéricas para Sandalias (20 a 27)
-    if (this.value === "5") {
+    if (categoria === "6") {
+      tallaSelect.disabled = true;
+      tallaSelect.value = "";
       tallaSelect.innerHTML = '<option value="">Seleccionar</option>';
-      for (let i = 20; i <= 27; i++) {
-        const opt = document.createElement("option");
-        opt.value = i;
-        opt.textContent = i;
-        tallaSelect.appendChild(opt);
-      }
+
+      colorSelect.disabled = true;
+      colorSelect.value = "";
     } else {
-      // Ropa: restaurar tallas estándar XS–XL
-      tallaSelect.innerHTML = `
-        <option value="">Seleccionar</option>
-        <option value="XS">XS</option>
-        <option value="S">S</option>
-        <option value="M">M</option>
-        <option value="L">L</option>
-        <option value="XL">XL</option>
-      `;
+      tallaSelect.disabled = false;
+      colorSelect.disabled = false;
+
+      // Tallas para sandalias
+      if (categoria === "5") {
+        tallaSelect.innerHTML = '<option value="">Seleccionar</option>';
+        for (let i = 20; i <= 27; i++) {
+          const opt = document.createElement("option");
+          opt.value = i;
+          opt.textContent = i;
+          tallaSelect.appendChild(opt);
+        }
+      } else {
+        tallaSelect.innerHTML = `
+          <option value="">Seleccionar</option>
+          <option value="XS">XS</option>
+          <option value="S">S</option>
+          <option value="M">M</option>
+          <option value="L">L</option>
+          <option value="XL">XL</option>
+        `;
+      }
     }
+
+    actualizarEtiqueta();
+  });
+
+  function actualizarEtiqueta() {
+    const timestamp = new Date().getTime().toString().slice(-5);
+    etiquetaHidden.value = timestamp;
   }
 
-  actualizarEtiqueta(); // Mantiene etiqueta actualizada
-});
+  modeloInput.addEventListener("input", actualizarEtiqueta);
+  colorSelect.addEventListener("change", actualizarEtiqueta);
+  tallaSelect.addEventListener("change", actualizarEtiqueta);
+  categoriaSelect.addEventListener("change", actualizarEtiqueta);
+</script>
 
-
-    function actualizarEtiqueta() {
-      const timestamp = new Date().getTime().toString().slice(-5);
-      document.getElementById("etiqueta").value = timestamp;
-    }
-
-    modeloInput.addEventListener("input", actualizarEtiqueta);
-    colorSelect.addEventListener("change", actualizarEtiqueta);
-    tallaSelect.addEventListener("change", actualizarEtiqueta);
-    categoriaSelect.addEventListener("change", actualizarEtiqueta);
-  </script>
 
   <?php if (isset($_GET['registroP']) && $_GET['registroP'] === 'exito'): ?>
     <div id="modalRegistroP" class="modal-overlay">
@@ -687,6 +689,8 @@ categoriaSelect.addEventListener("change", function () {
         soloLetrasMayus(this);
       });
     });
+    
   </script>
+  
 </body>
 </html>
