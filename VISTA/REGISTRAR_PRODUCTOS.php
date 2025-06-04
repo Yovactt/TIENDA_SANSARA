@@ -595,19 +595,52 @@ try {
       colorSelect.appendChild(opt);
     });
 
-    // Cargar modelos según categoría
-    categoriaSelect.addEventListener("change", function () {
-      const modelos = modelosPorCategoria[this.value] || [];
-      modeloInput.value = "";
-      modeloInput.setAttribute("list", "modelos-list");
-      let dataList = document.getElementById("modelos-list");
-      if (!dataList) {
-        dataList = document.createElement("datalist");
-        dataList.id = "modelos-list";
-        modeloInput.after(dataList);
+
+ // Cargar modelos y controlar talla según categoría
+categoriaSelect.addEventListener("change", function () {
+  const modelos = modelosPorCategoria[this.value] || [];
+  modeloInput.value = "";
+  modeloInput.setAttribute("list", "modelos-list");
+  let dataList = document.getElementById("modelos-list");
+  if (!dataList) {
+    dataList = document.createElement("datalist");
+    dataList.id = "modelos-list";
+    modeloInput.after(dataList);
+  }
+  dataList.innerHTML = modelos.map(modelo => `<option value="${modelo}">`).join("");
+
+  // Deshabilitar "Talla" si es Chacharas
+  if (this.value === "6") {
+    tallaSelect.disabled = true;
+    tallaSelect.value = "";
+    tallaSelect.innerHTML = '<option value="">Seleccionar</option>';
+  } else {
+    tallaSelect.disabled = false;
+
+    // Cargar tallas numéricas para Sandalias (20 a 27)
+    if (this.value === "5") {
+      tallaSelect.innerHTML = '<option value="">Seleccionar</option>';
+      for (let i = 20; i <= 27; i++) {
+        const opt = document.createElement("option");
+        opt.value = i;
+        opt.textContent = i;
+        tallaSelect.appendChild(opt);
       }
-      dataList.innerHTML = modelos.map(modelo => `<option value="${modelo}">`).join("");
-    });
+    } else {
+      // Ropa: restaurar tallas estándar XS–XL
+      tallaSelect.innerHTML = `
+        <option value="">Seleccionar</option>
+        <option value="XS">XS</option>
+        <option value="S">S</option>
+        <option value="M">M</option>
+        <option value="L">L</option>
+        <option value="XL">XL</option>
+      `;
+    }
+  }
+
+  actualizarEtiqueta(); // Mantiene etiqueta actualizada
+});
 
 function actualizarEtiqueta() {
   const timestamp = new Date().getTime().toString().slice(-5);
