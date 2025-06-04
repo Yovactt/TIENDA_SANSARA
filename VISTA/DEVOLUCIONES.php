@@ -452,7 +452,7 @@
         <input type="text" id="etiqueta" placeholder="Ingrese la etiqueta del producto">
 
         <label for="producto">Producto:</label>
-        <input type="text" id="producto" placeholder="Nombre del producto">
+        <input type="text" id="producto" readonly>
 
         <label for="talla">Talla:</label>
         <input type="text" id="talla" readonly>
