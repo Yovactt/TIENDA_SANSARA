@@ -5,7 +5,7 @@ date_default_timezone_set('America/Mexico_City');
 require_once '../MODELO/Conexion.php';
 
 if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], ['administrador', 'gerente'])) {
-    header("Location: ../REGISTRAR_PRODUCTOS.php?mensaje=" . urlencode("❌ No tienes permisos para registrar productos.") . "&tipo=error");
+    header("Location: ../VISTA/REGISTRAR_PRODUCTOS.php?mensaje=" . urlencode("❌ No tienes permisos para registrar productos.") . "&tipo=error");
     exit;
 }
 
@@ -27,13 +27,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Validación de campos requeridos
     if (empty($modelo) || empty($categoria_id) || empty($precio)) {
-        header("Location: ../REGISTRAR_PRODUCTOS.php?mensaje=" . urlencode("❗Completa todos los campos obligatorios.") . "&tipo=error");
+        header("Location: ../VISTA/REGISTRAR_PRODUCTOS.php?mensaje=" . urlencode("❗Completa todos los campos obligatorios.") . "&tipo=error");
         exit;
     }
 
     // Solo exigir talla y color si la categoría NO es Cháchara (ID 6)
     if ($categoria_id !== 6 && (empty($talla) || empty($color))) {
-        header("Location: ../REGISTRAR_PRODUCTOS.php?mensaje=" . urlencode("❗Talla y color son obligatorios para esta categoría.") . "&tipo=error");
+        header("Location: ../VISTA/REGISTRAR_PRODUCTOS.php?mensaje=" . urlencode("❗Talla y color son obligatorios para esta categoría.") . "&tipo=error");
         exit;
     }
 
@@ -48,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $existe = $verificar->fetchColumn();
 
         if ($existe > 0) {
-            header("Location: ../REGISTRAR_PRODUCTOS.php?mensaje=" . urlencode("⚠️ El producto ya existe con ese modelo, talla y sucursal.") . "&tipo=error");
+            header("Location: ../VISTA/REGISTRAR_PRODUCTOS.php?mensaje=" . urlencode("⚠️ El producto ya existe con ese modelo, talla y sucursal.") . "&tipo=error");
             exit;
         } else {
             $stmt = $conn->prepare("INSERT INTO productos
@@ -66,15 +66,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->bindParam(':cantidad', $cantidad);
 
             if ($stmt->execute()) {
-                header("Location: ../REGISTRAR_PRODUCTOS.php?registroP=exito");
+                header("Location: ../VISTA/REGISTRAR_PRODUCTOS.php?registroP=exito");
                 exit;
             } else {
-                header("Location: ../REGISTRAR_PRODUCTOS.php?mensaje=" . urlencode("❌ Error al registrar el producto.") . "&tipo=error");
+                header("Location: ../VISTA/REGISTRAR_PRODUCTOS.php?mensaje=" . urlencode("❌ Error al registrar el producto.") . "&tipo=error");
                 exit;
             }
         }
     } catch (PDOException $e) {
-        header("Location: ../REGISTRAR_PRODUCTOS.php?mensaje=" . urlencode("❌ Error de PDO: " . $e->getMessage()) . "&tipo=error");
+        header("Location: ../VISTA/REGISTRAR_PRODUCTOS.php?mensaje=" . urlencode("❌ Error de PDO: " . $e->getMessage()) . "&tipo=error");
         exit;
     }
 }
