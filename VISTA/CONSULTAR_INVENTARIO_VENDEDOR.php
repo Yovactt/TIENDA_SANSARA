@@ -423,7 +423,7 @@ $conn = null;
              <h2>SANSARA</h2>
     <p class="subtitulo">Vendedor</p>
     <br>
-    <a href="CONSULTAR_INVENTARIO.php"><i class="fas fa-search"></i><span>Consultar producto</span></a>
+<a href="CONSULTAR_INVENTARIO_VENDEDOR.php"><i class="fas fa-search"></i><span>Consultar producto</span></a>
     <a href="CERRAR_SESION.php"><i class="fas fa-sign-out-alt"></i><span>Cerrar sesión</span></a>
       </div>
 
